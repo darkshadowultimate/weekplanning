@@ -5,10 +5,21 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+    android:background="#000000"
+    android:orientation="vertical"
     tools:context=".MainActivity">
 
     <include
         android:id="@+id/custom_toolbar"
         layout="@layout/toolbar" />
+
+    <CalendarView
+        android:id="@+id/calendar"
+        android:background="#ffffff"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:weekDayTextAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        android:dateTextAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+        android:minHeight="300dp" />
 
 </LinearLayout>

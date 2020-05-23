@@ -25,4 +25,7 @@
     <string name="signup_button_text">CREATE ACCOUNT</string>
     <string name="login_link_text">Login into your account</string>
 
+    <!-- MainActivity -->
+    <string name="mainactivity_click_calendar">You\'ve clicked on the day</string>
+
 </resources>
