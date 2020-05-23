@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "1032750953334",
+    "firebase_url": "https://weekplanning-a1c0c.firebaseio.com",
+    "project_id": "weekplanning-a1c0c",
+    "storage_bucket": "weekplanning-a1c0c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1032750953334:android:f173cc6dca33e31cb70057",
+        "android_client_info": {
+          "package_name": "it.unindubria.pdm.weekplanning"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1032750953334-iq7t0iv264d0ta1budg5frspjbi2c27s.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "it.unindubria.pdm.weekplanning",
+            "certificate_hash": "b055701c32cee5cc7e74b428058c7d2dbdaa66fd"
+          }
+        },
+        {
+          "client_id": "1032750953334-echi2f2l2nllpafbst482feef9l2ae37.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_tYNk2nnQgq2bFeqwoOexm48lE95FQ3s"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1032750953334-echi2f2l2nllpafbst482feef9l2ae37.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
