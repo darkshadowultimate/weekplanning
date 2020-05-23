@@ -27,5 +27,20 @@
 
     <!-- MainActivity -->
     <string name="mainactivity_click_calendar">You\'ve clicked on the day</string>
+    <string name="mainactivity_add_breakfast">Add breakfast</string>
+    <string name="mainactivity_add_lunch">Add lunch</string>
+    <string name="mainactivity_add_dinner">Add dinner</string>
+
+    <!-- EditMeals -->
+    <string-array name="dropdown_types_meals">
+        <item>Breakfast</item>
+        <item>Lunch</item>
+        <item>Dinner</item>
+    </string-array>
+    <string name="dropdown_label">Type of meal</string>
+
+    <!-- EditMeals - Breakfast -->
+    <string name="insert_item_breakfast">Insert meal...</string>
+    <string name="add_item_breakfast">Add</string>
 
 </resources>

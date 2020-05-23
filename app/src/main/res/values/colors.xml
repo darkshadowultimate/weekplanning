@@ -4,4 +4,9 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
     <color name="colorTextToolbar">#FFFFFF</color>
+
+    <!-- MainActivity -->
+    <color name="colorCardMealBreakfast">#6bdf6e</color>
+    <color name="colorCardMealLunch">#ffa045</color>
+    <color name="colorCardMealDinner">#4790ff</color>
 </resources>

@@ -6,6 +6,10 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
+import java.util.Locale;
+
 public class Helper extends AppCompatActivity {
 
     public Intent changeActivity(Context context, Class classToLoad) {
@@ -17,13 +21,31 @@ public class Helper extends AppCompatActivity {
         return intent;
     }
 
+    public String convertDateToString(LocalDate date) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd, MMM, yyyy", Locale.ITALIAN);
+        return formatter.format(date);
+    }
+
     public void displayWithDialog(Context context, int title, int message) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
 
         builder
-        .setMessage(title)
-        .setTitle(message)
+        .setMessage(message)
+        .setTitle(title)
         .setPositiveButton(R.string.ok, null);
+
+        AlertDialog dialog = builder.create();
+
+        dialog.show();
+    }
+
+    public void displayWithDialog(Context context, String title, String message) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        builder
+            .setMessage(message)
+            .setTitle(title)
+            .setPositiveButton(R.string.ok, null);
 
         AlertDialog dialog = builder.create();
 
@@ -37,5 +59,4 @@ public class Helper extends AppCompatActivity {
                 Toast.LENGTH_LONG
         ).show();
     }
-
 }

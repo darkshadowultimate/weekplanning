@@ -1,25 +1,140 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-    android:background="#000000"
-    android:orientation="vertical"
-    tools:context=".MainActivity">
+    android:fillViewport="true">
 
-    <include
-        android:id="@+id/custom_toolbar"
-        layout="@layout/toolbar" />
-
-    <CalendarView
-        android:id="@+id/calendar"
-        android:background="#ffffff"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:weekDayTextAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-        android:dateTextAppearance="@style/Base.TextAppearance.AppCompat.Medium"
-        android:minHeight="300dp" />
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar"
+        android:orientation="vertical"
+        tools:context=".MainActivity">
 
-</LinearLayout>
+        <include
+            android:id="@+id/custom_toolbar"
+            layout="@layout/toolbar" />
+
+        <CalendarView
+            android:id="@+id/calendar"
+            android:background="#ffffff"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:weekDayTextAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:dateTextAppearance="@style/Base.TextAppearance.AppCompat.Medium"
+            android:minHeight="300dp" />
+
+        <Button
+            android:id="@+id/mainactivity_add_breakfast_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:text="@string/mainactivity_add_breakfast" />
+
+        <Button
+            android:id="@+id/mainactivity_add_lunch_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginVertical="10dp"
+            android:text="@string/mainactivity_add_lunch" />
+
+        <Button
+            android:id="@+id/mainactivity_add_dinner_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:text="@string/mainactivity_add_dinner" />
+
+        <!--
+
+            <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:padding="10dp"
+            android:background="@color/colorCardMealBreakfast"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Breakfast"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Coffee and milk"
+                android:textSize="12dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:layout_marginHorizontal="20dp"
+            android:padding="10dp"
+            android:background="@color/colorCardMealLunch"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lunch"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="Starter: onions"
+                android:textSize="12dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:text="First: spaghetti"
+                android:textSize="12dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginVertical="20dp"
+            android:layout_marginHorizontal="20dp"
+            android:padding="10dp"
+            android:background="@color/colorCardMealDinner"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Dinner"
+                android:textSize="16sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="First: rice with mushrooms"
+                android:textSize="12dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="3dp"
+                android:text="Second: grilled meat"
+                android:textSize="12dp" />
+        </LinearLayout>
+
+         -->
+    </LinearLayout>
+</ScrollView>
