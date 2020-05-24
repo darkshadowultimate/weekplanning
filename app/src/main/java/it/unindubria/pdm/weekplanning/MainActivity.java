@@ -96,9 +96,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
                 selectedDay = dayOfMonth;
-                selectedMonth = month;
+                selectedMonth = month + 1;
                 selectedYear = year;
-
                 // retrieve data from database
             }
         });

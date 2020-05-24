@@ -4,10 +4,14 @@ import android.content.ContentValues;
 
 public class Food {
 
-    private long id;
+    private long id = 10;
     private String name;
     private String consumationDate;
     private String category;
+
+    // in order to work with DataSnapshot (Firebase),
+    // this class must have a default constructor with no arguments
+    public Food() {}
 
     public Food(String name, String consumationDate, String category) {
         this.name = name;
@@ -47,7 +51,7 @@ public class Food {
         this.category = category;
     }
 
-    public ContentValues getAsContentValue() {
+    public ContentValues obtainAsContentValue() {
         ContentValues contentValues = new ContentValues();
 
         contentValues.put(DBContract.FoodItems.FOODS_NAME, this.name);

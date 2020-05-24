@@ -33,7 +33,7 @@ public class DBAdapter {
         long idFoodItem = db.insert(
             DBContract.FoodItems.FOODS_TABLE,
             null,
-            foodItem.getAsContentValue());
+            foodItem.obtainAsContentValue());
         return idFoodItem;
     }
 }

@@ -22,7 +22,7 @@ public class Helper extends AppCompatActivity {
     }
 
     public String convertDateToString(LocalDate date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd, MMM, yyyy", Locale.ITALIAN);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ITALIAN);
         return formatter.format(date);
     }
 
