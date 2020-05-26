@@ -48,6 +48,11 @@
             android:layout_marginHorizontal="20dp"
             android:text="@string/mainactivity_add_dinner" />
 
+        <FrameLayout
+            android:id="@+id/cards_meals"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"></FrameLayout>
+
         <!--
 
             <LinearLayout

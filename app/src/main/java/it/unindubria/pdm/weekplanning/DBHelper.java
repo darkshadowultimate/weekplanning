@@ -27,21 +27,14 @@ public class DBHelper extends SQLiteOpenHelper {
         DBContract.FoodItems.FOODS_CATEGORY + " TEXT, " +
         DBContract.FoodItems.FOODS_USER + " TEXT )";
 
-    String CREATE_CATEGORIES_TABLE =
-        "CREATE TABLE " + DBContract.CategoryItems.CATEGORIES_TABLE + " (" +
-        DBContract.CategoryItems.CATEGORIES_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
-        DBContract.CategoryItems.CATEGORIES_NAME + " TEXT )";
-
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_FOODS_TABLE);
-        db.execSQL(CREATE_CATEGORIES_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + DBContract.FoodItems.FOODS_TABLE);
-        db.execSQL("DROP TABLE IF EXISTS " + DBContract.CategoryItems.CATEGORIES_TABLE);
 
         this.onCreate(db);
     }

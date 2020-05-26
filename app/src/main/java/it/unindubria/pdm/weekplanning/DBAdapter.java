@@ -1,8 +1,12 @@
 package it.unindubria.pdm.weekplanning;
 
 import android.content.Context;
+import android.database.Cursor;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
+
+import java.util.ArrayList;
 
 public class DBAdapter {
 
@@ -35,5 +39,68 @@ public class DBAdapter {
             null,
             foodItem.obtainAsContentValue());
         return idFoodItem;
+    }
+
+    public String debugAllRecordsFoodTable() {
+        Cursor cursor = db.query(
+                DBContract.FoodItems.FOODS_TABLE,
+                DBContract.FoodItems.FOODS_COLUMNS,
+                null, null,
+                null, null, null, null
+        );
+        String result = "";
+
+        if (cursor.moveToFirst()) {
+            do {
+                long id = Long.parseLong(cursor.getString(0));
+                String name = cursor.getString(1);
+                String consumationDate = cursor.getString(2);
+                String categoryText = cursor.getString(3);
+                String userid = cursor.getString(4);
+
+                result += String.valueOf(id) + " -- " + name + " -- " + consumationDate + " -- " + categoryText + " -- " + userid + "  *******  ";
+            } while (cursor.moveToNext());
+        }
+
+        return result;
+    }
+
+    public ArrayList<Food> getAllFoodItemsSection(String userId, String date, String category) {
+        ArrayList<Food> listFoodItemsSection = new ArrayList<Food>();
+
+        Cursor cursor = db.query(
+            DBContract.FoodItems.FOODS_TABLE,
+            DBContract.FoodItems.FOODS_COLUMNS,
+            DBContract.FoodItems.FOODS_USER + " = ? AND "
+                    + DBContract.FoodItems.FOODS_CATEGORY + " = ? AND "
+                    + DBContract.FoodItems.FOODS_CONSUMATIONDATE + " = ?",
+            new String[] { userId, category, date },
+            null, null, null, null
+        );
+
+        if(cursor == null)
+            return null;
+
+        if(cursor.moveToFirst()) {
+            do {
+                long id = Long.parseLong(cursor.getString(0));
+                String name = cursor.getString(1);
+                String consumationDate = cursor.getString(2);
+                String categoryText = cursor.getString(3);
+                String _userId = cursor.getString(4);
+
+                listFoodItemsSection.add(0, new Food(id, name, consumationDate, categoryText, _userId));
+            } while (cursor.moveToNext());
+        }
+
+        return listFoodItemsSection;
+    }
+
+    public void removeFoodItem(long idItem) {
+        db.delete(
+            DBContract.FoodItems.FOODS_TABLE,
+            DBContract.FoodItems.FOODS_ID + " = ?",
+            new String[] { String.valueOf(idItem) }
+        );
     }
 }

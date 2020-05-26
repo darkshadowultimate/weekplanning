@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.widget.Toast;
 
 import java.time.LocalDate;
@@ -21,9 +22,10 @@ public class Helper extends AppCompatActivity {
         return intent;
     }
 
-    public String convertDateToString(LocalDate date) {
+    public String getStringDate(int day, int month, int year) {
+        LocalDate localDate = LocalDate.of(year, month, day);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ITALIAN);
-        return formatter.format(date);
+        return formatter.format(localDate);
     }
 
     public void displayWithDialog(Context context, int title, int message) {
@@ -58,5 +60,17 @@ public class Helper extends AppCompatActivity {
                 message,
                 Toast.LENGTH_LONG
         ).show();
+    }
+
+    public void displayWithToast(Context context, String message) {
+        Toast.makeText(
+                context,
+                message,
+                Toast.LENGTH_LONG
+        ).show();
+    }
+
+    public void dispayWithLog(String tag, String message) {
+        Log.d(tag, message);
     }
 }

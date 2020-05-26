@@ -15,21 +15,10 @@ public class DBContract {
          static final String FOODS_NAME = "name";
          static final String FOODS_CONSUMATIONDATE = "consumationDate";
          static final String FOODS_CATEGORY = "category";
-         static final String FOODS_USER = "user";
+         static final String FOODS_USER = "userId";
 
          static final String[] FOODS_COLUMNS = {
             FOODS_ID, FOODS_NAME, FOODS_CONSUMATIONDATE, FOODS_CATEGORY, FOODS_USER
-        };
-    }
-
-    static abstract class CategoryItems implements BaseColumns {
-         static final String CATEGORIES_TABLE = "categories";
-
-         static final String CATEGORIES_ID = "id";
-         static final String CATEGORIES_NAME = "name";
-
-         static final String[] CATEGORIES_COLUMNS = {
-            CATEGORIES_ID, CATEGORIES_NAME
         };
     }
 }

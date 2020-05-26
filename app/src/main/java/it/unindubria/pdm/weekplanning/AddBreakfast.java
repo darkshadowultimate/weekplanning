@@ -1,10 +1,13 @@
 package it.unindubria.pdm.weekplanning;
 
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -44,59 +47,51 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
 
     // Helpers & Others
     private Helper helper = new Helper();
-
-    @Override
-    public void onStart() {
-        super.onStart();
-
-        /*
-            FirebaseUser mUser = FirebaseAuth.getInstance().getCurrentUser();
-
-            if(mUser == null) {
-                startActivity(helper.changeActivity(this, LogIn.class));
-            } else {
-                uid = mUser.getUid();
-            }
-        */
-    }
+    private DBAdapter localDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_breakfast);
 
-        editTextFood = findViewById(R.id.breakfast_insert_food);
-        addFoodItemButton = findViewById(R.id.add_item_breakfast);
-        saveButton = findViewById(R.id.breakfast_save_button);
-
-        addFoodItemButton.setOnClickListener(this);
-        saveButton.setOnClickListener(this);
-
-        Intent mainActivityIntent = getIntent();
-        int day = mainActivityIntent.getIntExtra("day", 1);
-        int month = mainActivityIntent.getIntExtra("month", 1);
-        int year = mainActivityIntent.getIntExtra("year", 2020);
-
-
+        // setting up Firebase
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
 
         if(mFirebaseUser == null) {
-            startActivity(helper.changeActivity(this, LogIn.class));
+            startActivity(helper.changeActivity(AddBreakfast.this, LogIn.class));
         } else {
             uid = mFirebaseUser.getUid();
             mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         }
 
-        dateSelected = helper.convertDateToString(LocalDate.of(year, month, day));
-
+        // connect elements to UI
+        editTextFood = findViewById(R.id.breakfast_insert_food);
+        addFoodItemButton = findViewById(R.id.add_item_breakfast);
+        saveButton = findViewById(R.id.breakfast_finish_button);
         listView = findViewById(R.id.breakfast_list_food_items);
 
-        setUpRealtimeDBListener();
+        // setting listeners
+        addFoodItemButton.setOnClickListener(this);
+        saveButton.setOnClickListener(this);
+        handleRemoveListViewItem();
 
+        // getting data from intent
+        Intent mainActivityIntent = getIntent();
+        // saving the date choosen by the user already formatted
+        dateSelected = mainActivityIntent.getStringExtra("dateString");
+
+        // open connection to local SQLite database
+        localDB = DBAdapter.getInstance(AddBreakfast.this);
+        localDB.open();
+
+        // setting up listview and adapter
         listFoodItems = new ArrayList<Food>();
-        adapter = new ArrayAdapter<Food>(this, android.R.layout.simple_list_item_1, listFoodItems);
+        adapter = new ArrayAdapter<Food>(AddBreakfast.this, android.R.layout.simple_list_item_1, listFoodItems);
         listView.setAdapter(adapter);
+
+        // getting data from local DB SQLite
+        synchronizeListFoodItemsWithLocalDB();
     }
 
     @Override
@@ -113,82 +108,82 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
                     );
                 }
                 break;
-            case R.id.breakfast_save_button:
-                saveInfoToDB();
-                break;
+            case R.id.breakfast_finish_button:
+                finishActivityAndGoBack();
         }
     }
 
     public void addFoodItem() {
         String nameFoodItem = editTextFood.getText().toString();
-        Food food = new Food(nameFoodItem, dateSelected, "breakfast");
+        Food food = new Food(nameFoodItem, dateSelected, "breakfast", uid);
 
         listFoodItems.add(0, food);
         adapter.notifyDataSetChanged();
 
-        //long idItem = DBAdapter.getInstance(AddBreakfast.this).insert(food);
-        //food.setId(idItem);
+        saveInfoToDB(food);
 
         // The user could add more items at the time.
         // Clearing the focus and hiding the keyboard would be bad UX.
         editTextFood.setText("");
     }
 
-    private void saveInfoToDB() {
+    private void saveInfoToDB(Food item) {
         if(listFoodItems.size() > 0) {
-            DatabaseReference dbRef = mDatabaseRef
-                    .child(uid)
-                    .child(dateSelected)
-                    .child("breakfast")
-                    .push();
+            // update local SQLite database
+            long idItem = localDB.insert(item);
 
-            dbRef.setValue(listFoodItems.get(0));
+            item.setId(idItem);
 
-            //dbRef.setValue(foodItem);
-
-            //listFoodItems.get(0)
+            // update realtime database
+            DatabaseReference dbRef = mDatabaseRef.child(uid).child(dateSelected).push();
+            dbRef.setValue(item);
         }
-
-        finishAcitivyAndGoBack();
-
-        //for(Food foodItem: listFoodItems) {}
     }
 
-    private void setUpRealtimeDBListener() {
-        mDatabaseRef
-            .child(uid)
-            .child(dateSelected)
-            .child("breakfast")
-            .addValueEventListener(new ValueEventListener() {
+    private void synchronizeListFoodItemsWithLocalDB() {
+        ArrayList<Food> loadedFoodItems = localDB
+            .getAllFoodItemsSection(uid, dateSelected, "breakfast");
+
+        for(Food item: loadedFoodItems) {
+            listFoodItems.add(0, item);
+        }
+
+        adapter.notifyDataSetChanged();
+    }
+
+    private void handleRemoveListViewItem() {
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
+            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
+                new AlertDialog
+                    .Builder(AddBreakfast.this)
+                    .setTitle("Remove element")
+                    .setMessage("Do you really wanna remove this element?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            long idItem = listFoodItems.get(position).getId();
 
-                if(firstTimeLoadDataFromDB && dataSnapshot.getChildren() != null) {
-                    for(DataSnapshot snapshot: dataSnapshot.getChildren()) {
-                        listFoodItems.add(0, snapshot.getValue(Food.class));
-                    }
+                            localDB.removeFoodItem(idItem);
+                            listFoodItems.remove(position);
 
-                    adapter.notifyDataSetChanged();
-                    firstTimeLoadDataFromDB = false;
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
+                            adapter.notifyDataSetChanged();
+                        }
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
             }
         });
     }
 
-    private void finishAcitivyAndGoBack() {
+    private void finishActivityAndGoBack() {
+        localDB.close();
         startActivity(helper.changeActivity(AddBreakfast.this, MainActivity.class));
         finish();
     }
 
     @Override
     public void onBackPressed() {
-        finishAcitivyAndGoBack();
+        finishActivityAndGoBack();
     }
 }

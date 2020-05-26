@@ -11,15 +11,27 @@ import android.widget.Button;
 import android.widget.CalendarView;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
+    // Firebase
+    private FirebaseAuth mFirebaseAuth;
+    private FirebaseUser mFirebaseUser;
+    private DatabaseReference mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+    private String uid;
+
     // class' variables
-    private int selectedDay;
-    private int selectedMonth;
-    private int selectedYear;
+    private String selectedDateString;
 
     // UI elements
     private CalendarView calendar;
@@ -42,6 +54,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         if(FirebaseAuth.getInstance().getCurrentUser() == null) {
             startActivity(helper.changeActivity(this, LogIn.class));
+        } else {
+            mFirebaseAuth = FirebaseAuth.getInstance();
+            mFirebaseUser = mFirebaseAuth.getCurrentUser();
+
+            if(mFirebaseUser == null) {
+                startActivity(helper.changeActivity(this, LogIn.class));
+            } else {
+                uid = mFirebaseUser.getUid();
+                mDatabaseRef = FirebaseDatabase.getInstance().getReference();
+            }
         }
     }
 
@@ -62,6 +84,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         buttonAddBreakfast.setOnClickListener(this);
         buttonAddLunch.setOnClickListener(this);
         buttonAddDinner.setOnClickListener(this);
+
         setListernerCalendarView();
     }
 
@@ -70,10 +93,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         switch(view.getId()) {
             case R.id.mainactivity_add_breakfast_button:
                 Intent breakfastIntent = helper.changeActivity(MainActivity.this, AddBreakfast.class);
-                breakfastIntent.putExtra("day", selectedDay);
-                breakfastIntent.putExtra("month", selectedMonth);
-                breakfastIntent.putExtra("year", selectedYear);
-
+                breakfastIntent.putExtra("dateString", selectedDateString);
                 startActivity(breakfastIntent);
                 break;
             case R.id.mainactivity_add_lunch_button:
@@ -85,20 +105,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void setDefaultValueDateSelected() {
         LocalDateTime now = LocalDateTime.now();
-
-        selectedYear = now.getYear();
-        selectedMonth = now.getMonthValue();
-        selectedDay = now.getDayOfMonth();
+        selectedDateString = helper.getStringDate(now.getDayOfMonth(), now.getMonthValue(), now.getYear());
     }
 
     private void setListernerCalendarView() {
         calendar.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
             public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
-                selectedDay = dayOfMonth;
-                selectedMonth = month + 1;
-                selectedYear = year;
-                // retrieve data from database
+                selectedDateString = helper.getStringDate(dayOfMonth, month + 1, year);
             }
         });
     }
