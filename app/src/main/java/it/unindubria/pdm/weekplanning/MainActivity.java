@@ -194,7 +194,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 try {
                     calendar
                     .setDate(
-                        new SimpleDateFormat("dd/MM/yyyy")
+                        new SimpleDateFormat("dd-MM-yyyy")
                             .parse(stringDate)
                             .getTime(),
                         false,
