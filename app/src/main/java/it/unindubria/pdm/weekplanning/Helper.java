@@ -24,7 +24,7 @@ public class Helper extends AppCompatActivity {
 
     public String getStringDate(int day, int month, int year) {
         LocalDate localDate = LocalDate.of(year, month, day);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ITALIAN);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MMM/yyyy", Locale.ITALIAN);
         return formatter.format(localDate);
     }
 

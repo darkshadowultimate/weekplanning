@@ -1,5 +1,6 @@
 package it.unindubria.pdm.weekplanning;
 
+import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.v7.app.AlertDialog;
@@ -162,12 +163,14 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            long idItem = listFoodItems.get(position).getId();
+                            Food item = listFoodItems.get(position);
 
-                            localDB.removeFoodItem(idItem);
                             listFoodItems.remove(position);
-
                             adapter.notifyDataSetChanged();
+
+                            localDB.removeFoodItem(item.getId());
+
+                            //TODO: REMOVE ITEM FROM FIREBASE TOO
                         }
                     })
                     .setNegativeButton("No", null)
@@ -177,8 +180,12 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
     }
 
     private void finishActivityAndGoBack() {
-        localDB.close();
-        startActivity(helper.changeActivity(AddBreakfast.this, MainActivity.class));
+        //localDB.close();
+
+        Intent intent = new Intent();
+        intent.putExtra("lastSelectedDate", dateSelected);
+        setResult(Activity.RESULT_OK, intent);
+
         finish();
     }
 

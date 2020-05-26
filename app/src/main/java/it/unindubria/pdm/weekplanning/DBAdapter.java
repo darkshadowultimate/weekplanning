@@ -96,6 +96,36 @@ public class DBAdapter {
         return listFoodItemsSection;
     }
 
+    public ArrayList<Food> getAllFoodItemsDate(String userId, String date) {
+        ArrayList<Food> listFoodItemsSection = new ArrayList<Food>();
+
+        Cursor cursor = db.query(
+                DBContract.FoodItems.FOODS_TABLE,
+                DBContract.FoodItems.FOODS_COLUMNS,
+                DBContract.FoodItems.FOODS_USER + " = ? AND " +
+                DBContract.FoodItems.FOODS_CONSUMATIONDATE + " = ?",
+                new String[] { userId, date },
+                null, null, null, null
+        );
+
+        if(cursor == null)
+            return null;
+
+        if(cursor.moveToFirst()) {
+            do {
+                long id = Long.parseLong(cursor.getString(0));
+                String name = cursor.getString(1);
+                String consumationDate = cursor.getString(2);
+                String categoryText = cursor.getString(3);
+                String _userId = cursor.getString(4);
+
+                listFoodItemsSection.add(0, new Food(id, name, consumationDate, categoryText, _userId));
+            } while (cursor.moveToNext());
+        }
+
+        return listFoodItemsSection;
+    }
+
     public void removeFoodItem(long idItem) {
         db.delete(
             DBContract.FoodItems.FOODS_TABLE,

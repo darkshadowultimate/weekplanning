@@ -1,14 +1,20 @@
 package it.unindubria.pdm.weekplanning;
 
+import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CalendarView;
+import android.widget.FrameLayout;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -19,15 +25,22 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+
+    // CONSTANTS
+    private static final int ADD_ITEMS_BREAKFAST = 1;
 
     // Firebase
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
-    private DatabaseReference mDatabaseRef = FirebaseDatabase.getInstance().getReference();
     private String uid;
 
     // class' variables
@@ -38,9 +51,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private Button buttonAddBreakfast;
     private Button buttonAddLunch;
     private Button buttonAddDinner;
+    // -- Breakfast --
+    private LinearLayout breakfastCard;
+    private TextView titleBreakfastCard;
+    private TextView foodItemBreakfast;
 
     // Helpers & Others
     private Helper helper = new Helper();
+    private DBAdapter localDB;
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -49,52 +67,87 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     @Override
-    public void onStart() {
-        super.onStart();
-
-        if(FirebaseAuth.getInstance().getCurrentUser() == null) {
-            startActivity(helper.changeActivity(this, LogIn.class));
-        } else {
-            mFirebaseAuth = FirebaseAuth.getInstance();
-            mFirebaseUser = mFirebaseAuth.getCurrentUser();
-
-            if(mFirebaseUser == null) {
-                startActivity(helper.changeActivity(this, LogIn.class));
-            } else {
-                uid = mFirebaseUser.getUid();
-                mDatabaseRef = FirebaseDatabase.getInstance().getReference();
-            }
-        }
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setDefaultValueDateSelected();
 
+        // setting up Firebase
+        mFirebaseAuth = FirebaseAuth.getInstance();
+        mFirebaseUser = mFirebaseAuth.getCurrentUser();
+
+        if(mFirebaseUser == null) {
+            startActivity(helper.changeActivity(MainActivity.this, LogIn.class));
+        } else {
+            uid = mFirebaseUser.getUid();
+        }
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.custom_toolbar);
         setSupportActionBar(toolbar);
+
+        // open connection to local SQLite database
+        localDB = DBAdapter.getInstance(MainActivity.this);
+        localDB.open();
 
         calendar = (CalendarView) findViewById(R.id.calendar);
         buttonAddBreakfast = findViewById(R.id.mainactivity_add_breakfast_button);
         buttonAddLunch = findViewById(R.id.mainactivity_add_lunch_button);
         buttonAddDinner = findViewById(R.id.mainactivity_add_dinner_button);
 
+        breakfastCard = findViewById(R.id.single_card_breakfast);
+        titleBreakfastCard = findViewById(R.id.title_breakfast_card);
+        foodItemBreakfast = findViewById(R.id.food_items_part_breakfast);
+
         buttonAddBreakfast.setOnClickListener(this);
         buttonAddLunch.setOnClickListener(this);
         buttonAddDinner.setOnClickListener(this);
-
+        breakfastCard.setOnClickListener(this);
         setListernerCalendarView();
+
+        updateUI();
+
+        //inflateLayoutTest();
+    }
+
+    private void updateUI() {
+        ArrayList<Food> foodDateList = localDB.getAllFoodItemsDate(uid, selectedDateString);
+
+        updateBreakfast(foodDateList);
+    }
+
+    private void updateBreakfast(ArrayList<Food> foodItems) {
+        String allItems = "";
+
+        if(foodItems.size() > 0) {
+            breakfastCard.setVisibility(View.VISIBLE);
+            buttonAddBreakfast.setVisibility(View.GONE);
+
+            for(Food item: foodItems) {
+                allItems += "- " + item.getName() + "\n";
+            }
+            foodItemBreakfast.setText(allItems);
+        } else {
+            if(buttonAddBreakfast.getVisibility() == View.GONE) {
+                breakfastCard.setVisibility(View.GONE);
+                buttonAddBreakfast.setVisibility(View.VISIBLE);
+            }
+        }
+    }
+
+    private void inflateLayoutTest() {
+
+        // To hide and element
+        //buttonAddBreakfast.setVisibility(View.GONE);
     }
 
     @Override
     public void onClick(View view) {
         switch(view.getId()) {
+            case R.id.single_card_breakfast:
             case R.id.mainactivity_add_breakfast_button:
-                Intent breakfastIntent = helper.changeActivity(MainActivity.this, AddBreakfast.class);
+                Intent breakfastIntent = new Intent(MainActivity.this, AddBreakfast.class);
                 breakfastIntent.putExtra("dateString", selectedDateString);
-                startActivity(breakfastIntent);
+                startActivityForResult(breakfastIntent, ADD_ITEMS_BREAKFAST);
                 break;
             case R.id.mainactivity_add_lunch_button:
             case R.id.mainactivity_add_dinner_button:
@@ -113,6 +166,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             @Override
             public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
                 selectedDateString = helper.getStringDate(dayOfMonth, month + 1, year);
+                updateUI();
             }
         });
     }
@@ -127,6 +181,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == ADD_ITEMS_BREAKFAST) {
+            if(resultCode == Activity.RESULT_OK){
+                String stringDate = data.getStringExtra("lastSelectedDate");
+
+                try {
+                    calendar
+                    .setDate(
+                        new SimpleDateFormat("dd/MM/yyyy")
+                            .parse(stringDate)
+                            .getTime(),
+                        false,
+                        false
+                    );
+                } catch(ParseException exc) {}
+            }
+            if (resultCode == Activity.RESULT_CANCELED) {
+                //Write your code if there's no result
+            }
+        }
     }
 
     private void logout() {
