@@ -1,25 +1,35 @@
 package it.unindubria.pdm.weekplanning;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.os.Environment;
+import android.provider.MediaStore;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -28,11 +38,11 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
 
     // CONSTANTS
     private final String[] SUBCATEGORIES_VOICES_DB = { "before", "first", "second", "after" };
+    private static final int TAKE_PHOTO_CODE = 10;
 
     // Firebase
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
-    private DatabaseReference mDatabaseRef = FirebaseDatabase.getInstance().getReference();
     private String uid;
 
     // class' variables
@@ -42,10 +52,13 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
     private String dateSelected;
     private String lunchOrDinner;
     Map<String, Integer> prioritySubCategories;
+
     // UI elements
     private EditText editTextFood;
     private Button addFoodItemButton;
+    private Button takePicture;
     private Button saveButton;
+    private ImageView previewImage;
     private Spinner dropdown_subcategories;
 
 
@@ -66,18 +79,20 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
             startActivity(helper.changeActivity(AddLunchDinner.this, LogIn.class));
         } else {
             uid = mFirebaseUser.getUid();
-            mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         }
 
         // connect elements to UI
         editTextFood = findViewById(R.id.dinner_lunch_insert_food);
         addFoodItemButton = findViewById(R.id.add_item_dinner_lunch);
+        takePicture = findViewById(R.id.take_picture_button);
         saveButton = findViewById(R.id.dinner_lunch_finish_button);
+        previewImage = findViewById(R.id.preview_image_meal);
         listViewLunchDinner = findViewById(R.id.listview_dinner_lunch);
         dropdown_subcategories = findViewById(R.id.dropdown_subcategory);
 
         // setting listeners
         addFoodItemButton.setOnClickListener(this);
+        takePicture.setOnClickListener(this);
         saveButton.setOnClickListener(this);
         handleRemoveListViewItem();
 
@@ -97,6 +112,10 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         // open connection to local SQLite database
         localDB = DBAdapter.getInstance(AddLunchDinner.this);
         localDB.openWrite();
+
+        helper.createNewDirectory("/WeekPlanning/" + uid + "/" + dateSelected);
+
+        setPreviewImage();
 
         // setting up listview and adapter
         listFoodItemsLunchDinner = new ArrayList<Food>();
@@ -121,9 +140,51 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
                     );
                 }
                 break;
+            case R.id.take_picture_button:
+                handleTakePicture();
+                break;
             case R.id.dinner_lunch_finish_button:
                 finishActivityAndGoBack();
                 break;
+        }
+    }
+
+    private void setPreviewImage() {
+        String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/WeekPlanning/" + uid + "/" + dateSelected + "/" + lunchOrDinner + "/" + uid + "_" + dateSelected + ".png";
+        File imgFile = new File(filePath);
+
+        if(imgFile.exists()) {
+            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+            previewImage.setImageBitmap(myBitmap);
+        }
+    }
+
+    private void handleTakePicture() {
+        if (ContextCompat.checkSelfPermission(AddLunchDinner.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(
+                    AddLunchDinner.this,
+                    new String[] {
+                            Manifest.permission.CAMERA
+                    },
+                    TAKE_PHOTO_CODE
+            );
+        } else {
+            helper.createNewDirectory("/WeekPlanning/" + uid + "/" + dateSelected + "/" + lunchOrDinner);
+
+            String file = Environment.getExternalStorageDirectory().getAbsolutePath() + "/WeekPlanning/" + uid + "/" + dateSelected + "/" + lunchOrDinner + "/" + uid + "_" + dateSelected + ".png";
+            File newfile = new File(file);
+            try {
+                newfile.createNewFile();
+            }
+            catch (IOException e) {
+                helper.displayWithToast(AddLunchDinner.this, "File not created");
+            }
+
+            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+            if(cameraIntent.resolveActivity(getPackageManager()) != null) {
+                startActivityForResult(cameraIntent, TAKE_PHOTO_CODE);
+            }
         }
     }
 
@@ -179,10 +240,6 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
             long idItem = localDB.insert(item);
 
             item.setId(idItem);
-
-            // update realtime database
-            DatabaseReference dbRef = mDatabaseRef.child(uid).child(dateSelected).push();
-            dbRef.setValue(item);
         }
     }
 
@@ -204,6 +261,36 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
 
         adapterLunchDinner.notifyDataSetChanged();
         return;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == TAKE_PHOTO_CODE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                handleTakePicture();
+            } else {
+                helper.displayWithToast(AddLunchDinner.this, "You won't be able to take pictures");
+            }
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == TAKE_PHOTO_CODE && resultCode == RESULT_OK) {
+            Bitmap imageBitmap = (Bitmap) data.getExtras().get("data");
+            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/WeekPlanning/" + uid + "/" + dateSelected + "/" + lunchOrDinner + "/" + uid + "_" + dateSelected + ".png");
+
+            helper.displayWithToast(AddLunchDinner.this, "THE IMAGE HAS BEEN TAKEN");
+            try (FileOutputStream out = new FileOutputStream(file)) {
+                imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
+                setPreviewImage();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
     }
 
     private void handleRemoveListViewItem() {

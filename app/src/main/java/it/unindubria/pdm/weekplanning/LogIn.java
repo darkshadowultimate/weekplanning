@@ -1,6 +1,10 @@
 package it.unindubria.pdm.weekplanning;
 
+import android.Manifest;
+import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -15,6 +19,9 @@ import com.google.firebase.auth.FirebaseAuth;
 
 public class LogIn extends AppCompatActivity implements View.OnClickListener {
 
+    // CONSTANTS
+    private static final int WRITE_ON_STORAGE_CODE = 3;
+
     // Firebase
     private FirebaseAuth mAuth;
 
@@ -28,22 +35,19 @@ public class LogIn extends AppCompatActivity implements View.OnClickListener {
     private Helper helper = new Helper();
 
     @Override
-    public void onStart() {
-        super.onStart();
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_log_in);
 
         mAuth = FirebaseAuth.getInstance();
 
         //getApplicationContext().deleteDatabase(DBContract.DB_NAME);
 
+        createMainFolderOnExternalStorage();
+
         if(mAuth.getCurrentUser() != null) {
             startActivity(helper.changeActivity(this, MainActivity.class));
         }
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_log_in);
 
         emailField = findViewById(R.id.email_field);
         passwordField = findViewById(R.id.password_field);
@@ -52,6 +56,37 @@ public class LogIn extends AppCompatActivity implements View.OnClickListener {
 
         loginButton.setOnClickListener(this);
         linkSignUpPage.setOnClickListener(this);
+    }
+
+    private void createMainFolderOnExternalStorage() {
+        if (ContextCompat
+                .checkSelfPermission(
+                    LogIn.this,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+        ) {
+            ActivityCompat.requestPermissions(
+                LogIn.this,
+                new String[] {
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                },
+                WRITE_ON_STORAGE_CODE
+            );
+        } else {
+            helper.createNewDirectory("/WeekPlanning");
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == WRITE_ON_STORAGE_CODE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                createMainFolderOnExternalStorage();
+            } else {
+                helper.displayWithToast(LogIn.this, "You won't be able to use this app");
+                finish();
+            }
+        }
     }
 
     @Override

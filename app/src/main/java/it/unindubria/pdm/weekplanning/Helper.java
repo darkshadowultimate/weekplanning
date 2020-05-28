@@ -2,11 +2,16 @@ package it.unindubria.pdm.weekplanning;
 
 import android.content.Context;
 import android.content.Intent;
+import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
@@ -20,6 +25,23 @@ public class Helper extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         return intent;
+    }
+
+    public void createNewDirectory(String restOfPath) {
+        String absolutePathAppDirectory = Environment.getExternalStorageDirectory().getAbsolutePath() + restOfPath;
+        Path path = Paths.get(absolutePathAppDirectory);
+
+        if(Files.notExists(path)) {
+            dispayWithLog("CREATING DIRECTORY", "DIRECTORY DOESN'T EXISTS");
+            File dir = new File(absolutePathAppDirectory);
+            try{
+                dir.mkdir();
+            }catch(Exception e){
+                e.printStackTrace();
+            }
+        } else {
+            dispayWithLog("CREATING DIRECTORY", "DIRECTORY ALREADY EXISTS");
+        }
     }
 
     public String getStringDate(int day, int month, int year) {

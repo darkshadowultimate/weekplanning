@@ -107,6 +107,7 @@
                 android:orientation="horizontal">
 
                 <LinearLayout
+                    android:id="@+id/lunch_before_subcategory"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -122,7 +123,7 @@
                         android:textSize="14dp" />
 
                     <TextView
-                        android:id="@+id/food_items_part_meal_before"
+                        android:id="@+id/lunch_part_meal_before"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
@@ -132,6 +133,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/lunch_first_subcategory"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -147,7 +149,7 @@
                         android:textSize="14dp" />
 
                     <TextView
-                        android:id="@+id/food_items_part_meal_first"
+                        android:id="@+id/lunch_part_meal_first"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
@@ -162,6 +164,7 @@
                 android:orientation="horizontal">
 
                 <LinearLayout
+                    android:id="@+id/lunch_second_subcategory"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -177,7 +180,7 @@
                         android:textSize="14dp" />
 
                     <TextView
-                        android:id="@+id/food_items_part_meal_second"
+                        android:id="@+id/lunch_part_meal_second"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
@@ -187,6 +190,7 @@
                 </LinearLayout>
 
                 <LinearLayout
+                    android:id="@+id/lunch_after_subcategory"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
@@ -202,7 +206,7 @@
                         android:textSize="14dp" />
 
                     <TextView
-                        android:id="@+id/food_items_part_meal_after"
+                        android:id="@+id/lunch_part_meal_after"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
@@ -213,93 +217,141 @@
             </LinearLayout>
         </LinearLayout>
 
-        <!--
-
-            <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:padding="10dp"
-            android:background="@color/colorCardMealBreakfast"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Breakfast"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="Coffee and milk"
-                android:textSize="12dp" />
-        </LinearLayout>
-
         <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:id="@+id/single_card_dinner"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="15dp"
             android:layout_marginHorizontal="20dp"
             android:padding="10dp"
-            android:background="@color/colorCardMealLunch"
-            android:orientation="vertical">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Lunch"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="Starter: onions"
-                android:textSize="12dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:text="First: spaghetti"
-                android:textSize="12dp" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginVertical="20dp"
-            android:layout_marginHorizontal="20dp"
-            android:padding="10dp"
+            android:visibility="gone"
             android:background="@color/colorCardMealDinner"
             android:orientation="vertical">
 
             <TextView
+                android:id="@+id/title_dinner_card"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
                 android:text="Dinner"
                 android:textSize="16sp"
                 android:textStyle="bold" />
 
-            <TextView
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:text="First: rice with mushrooms"
-                android:textSize="12dp" />
+                android:orientation="horizontal">
 
-            <TextView
-                android:layout_width="wrap_content"
+                <LinearLayout
+                    android:id="@+id/dinner_before_subcategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/dinner_part_of_meal_before"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginHorizontal="10dp"
+                        android:text="- Antipasto"
+                        android:textSize="14dp" />
+
+                    <TextView
+                        android:id="@+id/dinner_part_meal_before"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginHorizontal="25dp"
+                        android:text=""
+                        android:textSize="12dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/dinner_first_subcategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/dinner_part_of_meal_first"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginHorizontal="10dp"
+                        android:text="- Primo"
+                        android:textSize="14dp" />
+
+                    <TextView
+                        android:id="@+id/dinner_part_meal_first"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginHorizontal="25dp"
+                        android:text=""
+                        android:textSize="12dp" />
+                </LinearLayout>
+            </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="3dp"
-                android:text="Second: grilled meat"
-                android:textSize="12dp" />
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/dinner_second_subcategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/dinner_part_of_meal_second"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginHorizontal="10dp"
+                        android:text="- Secondo"
+                        android:textSize="14dp" />
+
+                    <TextView
+                        android:id="@+id/dinner_part_meal_second"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginHorizontal="25dp"
+                        android:text=""
+                        android:textSize="12dp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/dinner_after_subcategory"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:id="@+id/dinner_part_of_meal_after"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginHorizontal="10dp"
+                        android:text="- Fine pranzo"
+                        android:textSize="14dp" />
+
+                    <TextView
+                        android:id="@+id/dinner_part_meal_after"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:layout_marginHorizontal="25dp"
+                        android:text=""
+                        android:textSize="12dp" />
+                </LinearLayout>
+            </LinearLayout>
         </LinearLayout>
-
-         -->
     </LinearLayout>
 </ScrollView>

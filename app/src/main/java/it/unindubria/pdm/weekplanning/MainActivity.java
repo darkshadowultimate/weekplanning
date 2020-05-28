@@ -60,6 +60,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // -- Lunch --
     private TextView partOfMealSection;
     private LinearLayout lunchCard;
+    // -- Dinner --
+    private LinearLayout dinnerCard;
 
     // Helpers & Others
     private Helper helper = new Helper();
@@ -85,6 +87,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             startActivity(helper.changeActivity(MainActivity.this, LogIn.class));
         } else {
             uid = mFirebaseUser.getUid();
+            helper.createNewDirectory("/WeekPlanning/" + uid);
         }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.custom_toolbar);
@@ -97,19 +100,22 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         calendar = (CalendarView) findViewById(R.id.calendar);
         buttonAddBreakfast = findViewById(R.id.mainactivity_add_breakfast_button);
         buttonAddLunch = findViewById(R.id.mainactivity_add_lunch_button);
-        //buttonAddDinner = findViewById(R.id.mainactivity_add_dinner_button);
+        buttonAddDinner = findViewById(R.id.mainactivity_add_dinner_button);
 
         breakfastCard = findViewById(R.id.single_card_breakfast);
         titleBreakfastCard = findViewById(R.id.title_breakfast_card);
         foodItemBreakfast = findViewById(R.id.food_items_part_breakfast);
 
         lunchCard = findViewById(R.id.single_card_lunch);
+        dinnerCard = findViewById(R.id.single_card_dinner);
 
         buttonAddBreakfast.setOnClickListener(this);
         buttonAddLunch.setOnClickListener(this);
-        //buttonAddDinner.setOnClickListener(this);
+        buttonAddDinner.setOnClickListener(this);
         breakfastCard.setOnClickListener(this);
         lunchCard.setOnClickListener(this);
+        dinnerCard.setOnClickListener(this);
+
         setListernerCalendarView();
 
         updateUI();
@@ -118,18 +124,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private void updateUI() {
         ArrayList<Food> foodDateList = localDB.getAllFoodItemsDate(uid, selectedDateString);
 
-        //helper.dispayWithLog("UPDATEUI ====> ", "UPDATEUI -----" + foodDateList.toString());
+        helper.dispayWithLog("UPDATEUI ====> ", foodDateList.toString());
 
-        if(foodDateList.size() > 0) {
-            updateBreakfast(foodDateList);
-            updateLunch(foodDateList);
-        } else {
-            buttonAddBreakfast.setVisibility(View.VISIBLE);
-            breakfastCard.setVisibility(View.GONE);
-
-            buttonAddLunch.setVisibility(View.VISIBLE);
-            lunchCard.setVisibility(View.GONE);
-        }
+        updateBreakfast(foodDateList);
+        updateLunch(foodDateList, "lunch");
+        updateLunch(foodDateList, "dinner");
     }
 
     private void updateBreakfast(ArrayList<Food> foodItems) {
@@ -145,31 +144,58 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         if(!allItems.isEmpty()) {
             breakfastCard.setVisibility(View.VISIBLE);
             buttonAddBreakfast.setVisibility(View.GONE);
+        } else {
+            buttonAddBreakfast.setVisibility(View.VISIBLE);
+            breakfastCard.setVisibility(View.GONE);
         }
     }
 
-    private void updateLunch(ArrayList<Food> foodItems) {
-        lunchCard.setVisibility(View.VISIBLE);
-        buttonAddLunch.setVisibility(View.GONE);
+    private void updateLunch(ArrayList<Food> foodItems, String lunchOrDinner) {
+        boolean isThereLunch = false;
+
+        //lunch_before_subcategory
 
         for(String subcategory: SUBCATEGORIES_VOICES_DB) {
             String allItems = "";
 
             for(Food item: foodItems) {
-                if(item.getCategory().equals("lunch") && item.getSubcategory().equals(subcategory)) {
+                if(item.getCategory().equals(lunchOrDinner) && item.getSubcategory().equals(subcategory)) {
                     allItems += ". " + item.getName() + "\n";
                 }
             }
-            String idView = "food_items_part_meal_" + subcategory;
+
+            String idView = lunchOrDinner + "_part_meal_" + subcategory;
             partOfMealSection = findViewById(
                 getResources()
                 .getIdentifier(idView, "id", MainActivity.this.getPackageName())
             );
+            // clear the text in the card
+            partOfMealSection.setText("");
+
             if(allItems.isEmpty()) {
-                partOfMealSection.setVisibility(View.GONE);
+                //partOfMealSection.setVisibility(View.GONE);
             } else {
+                isThereLunch = true;
                 partOfMealSection.setText(allItems);
                 partOfMealSection.setVisibility(View.VISIBLE);
+            }
+        }
+
+        if(isThereLunch) {
+            if(lunchOrDinner.equals("lunch")) {
+                lunchCard.setVisibility(View.VISIBLE);
+                buttonAddLunch.setVisibility(View.GONE);
+            } else {
+                dinnerCard.setVisibility(View.VISIBLE);
+                buttonAddDinner.setVisibility(View.GONE);
+            }
+        } else {
+            if(lunchOrDinner.equals("lunch")) {
+                lunchCard.setVisibility(View.GONE);
+                buttonAddLunch.setVisibility(View.VISIBLE);
+            } else {
+                dinnerCard.setVisibility(View.GONE);
+                buttonAddDinner.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -190,6 +216,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 lunchIntent.putExtra("lunchOrLunch", "lunch");
                 startActivityForResult(lunchIntent, ADD_ITEMS_LUNCH_DINNER);
                 break;
+            case R.id.single_card_dinner:
             case R.id.mainactivity_add_dinner_button:
                 Intent dinnerIntent = new Intent(MainActivity.this, AddLunchDinner.class);
                 dinnerIntent.putExtra("dateString", selectedDateString);
