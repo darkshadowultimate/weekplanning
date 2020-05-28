@@ -124,9 +124,10 @@ public class DBAdapter {
                 String name = cursor.getString(1);
                 String consumationDate = cursor.getString(2);
                 String categoryText = cursor.getString(3);
-                String _userId = cursor.getString(4);
+                String subcategory = cursor.getString(4);
+                String _userId = cursor.getString(5);
 
-                listFoodItemsSection.add(0, new Food(id, name, consumationDate, categoryText, _userId));
+                listFoodItemsSection.add(0, new Food(id, name, consumationDate, categoryText, subcategory, _userId));
             } while (cursor.moveToNext());
         }
 

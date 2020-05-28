@@ -38,6 +38,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     // CONSTANTS
     private static final int ADD_ITEMS_BREAKFAST = 1;
     private static final int ADD_ITEMS_LUNCH_DINNER = 2;
+    private final String[] SUBCATEGORIES_VOICES_DB = { "before", "first", "second", "after" };
 
     // Firebase
     private FirebaseAuth mFirebaseAuth;
@@ -56,6 +57,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private LinearLayout breakfastCard;
     private TextView titleBreakfastCard;
     private TextView foodItemBreakfast;
+    // -- Lunch --
+    private TextView partOfMealSection;
+    private LinearLayout lunchCard;
 
     // Helpers & Others
     private Helper helper = new Helper();
@@ -99,10 +103,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         titleBreakfastCard = findViewById(R.id.title_breakfast_card);
         foodItemBreakfast = findViewById(R.id.food_items_part_breakfast);
 
+        lunchCard = findViewById(R.id.single_card_lunch);
+
         buttonAddBreakfast.setOnClickListener(this);
         buttonAddLunch.setOnClickListener(this);
         //buttonAddDinner.setOnClickListener(this);
         breakfastCard.setOnClickListener(this);
+        lunchCard.setOnClickListener(this);
         setListernerCalendarView();
 
         updateUI();
@@ -113,29 +120,57 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         //helper.dispayWithLog("UPDATEUI ====> ", "UPDATEUI -----" + foodDateList.toString());
 
-        updateBreakfast(foodDateList);
+        if(foodDateList.size() > 0) {
+            updateBreakfast(foodDateList);
+            updateLunch(foodDateList);
+        } else {
+            buttonAddBreakfast.setVisibility(View.VISIBLE);
+            breakfastCard.setVisibility(View.GONE);
+
+            buttonAddLunch.setVisibility(View.VISIBLE);
+            lunchCard.setVisibility(View.GONE);
+        }
     }
 
     private void updateBreakfast(ArrayList<Food> foodItems) {
         String allItems = "";
 
-        if(foodItems.size() > 0) {
-            for(Food item: foodItems) {
-                if(item.getCategory().equals("breakfast")) {
-                    allItems += "- " + item.getName() + "\n";
-                }
+        for(Food item: foodItems) {
+            if(item.getCategory().equals("breakfast")) {
+                allItems += "- " + item.getName() + "\n";
             }
-            foodItemBreakfast.setText(allItems);
         }
+        foodItemBreakfast.setText(allItems);
 
-        if(allItems.isEmpty()) {
-            if(buttonAddBreakfast.getVisibility() == View.GONE) {
-                breakfastCard.setVisibility(View.GONE);
-                buttonAddBreakfast.setVisibility(View.VISIBLE);
-            }
-        } else {
+        if(!allItems.isEmpty()) {
             breakfastCard.setVisibility(View.VISIBLE);
             buttonAddBreakfast.setVisibility(View.GONE);
+        }
+    }
+
+    private void updateLunch(ArrayList<Food> foodItems) {
+        lunchCard.setVisibility(View.VISIBLE);
+        buttonAddLunch.setVisibility(View.GONE);
+
+        for(String subcategory: SUBCATEGORIES_VOICES_DB) {
+            String allItems = "";
+
+            for(Food item: foodItems) {
+                if(item.getCategory().equals("lunch") && item.getSubcategory().equals(subcategory)) {
+                    allItems += ". " + item.getName() + "\n";
+                }
+            }
+            String idView = "food_items_part_meal_" + subcategory;
+            partOfMealSection = findViewById(
+                getResources()
+                .getIdentifier(idView, "id", MainActivity.this.getPackageName())
+            );
+            if(allItems.isEmpty()) {
+                partOfMealSection.setVisibility(View.GONE);
+            } else {
+                partOfMealSection.setText(allItems);
+                partOfMealSection.setVisibility(View.VISIBLE);
+            }
         }
     }
 
@@ -148,6 +183,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 breakfastIntent.putExtra("dateString", selectedDateString);
                 startActivityForResult(breakfastIntent, ADD_ITEMS_BREAKFAST);
                 break;
+            case R.id.single_card_lunch:
             case R.id.mainactivity_add_lunch_button:
                 Intent lunchIntent = new Intent(MainActivity.this, AddLunchDinner.class);
                 lunchIntent.putExtra("dateString", selectedDateString);

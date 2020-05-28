@@ -104,7 +104,7 @@ public class Food {
         contentValues.put(DBContract.FoodItems.FOODS_CONSUMATIONDATE, this.consumationDate);
         contentValues.put(DBContract.FoodItems.FOODS_CATEGORY, this.category);
 
-        if(!this.subcategory.isEmpty()) {
+        if(this.subcategory != null || !this.subcategory.isEmpty()) {
             contentValues.put(DBContract.FoodItems.FOODS_SUBCATEGORY, this.subcategory);
         }
 
@@ -115,6 +115,6 @@ public class Food {
 
     @Override
     public String toString() {
-        return name + (!this.subcategory.isEmpty() ? " - " + this.subcategory : "");
+        return name + (this.subcategory != null && !this.subcategory.isEmpty() ? " - " + this.subcategory : "");
     }
 }
