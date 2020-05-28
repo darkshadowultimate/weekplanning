@@ -15,10 +15,11 @@ public class DBContract {
          static final String FOODS_NAME = "name";
          static final String FOODS_CONSUMATIONDATE = "consumationDate";
          static final String FOODS_CATEGORY = "category";
+        static final String FOODS_SUBCATEGORY = "subcategory";
          static final String FOODS_USER = "userId";
 
          static final String[] FOODS_COLUMNS = {
-            FOODS_ID, FOODS_NAME, FOODS_CONSUMATIONDATE, FOODS_CATEGORY, FOODS_USER
+            FOODS_ID, FOODS_NAME, FOODS_CONSUMATIONDATE, FOODS_CATEGORY, FOODS_SUBCATEGORY, FOODS_USER
         };
     }
 }

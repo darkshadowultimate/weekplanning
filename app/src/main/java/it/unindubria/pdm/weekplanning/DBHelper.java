@@ -19,12 +19,13 @@ public class DBHelper extends SQLiteOpenHelper {
         super(context, DBContract.DB_NAME, null, DBContract.DB_VERSION);
     }
 
-    String CREATE_FOODS_TABLE =
+    private String CREATE_FOODS_TABLE =
         "CREATE TABLE " + DBContract.FoodItems.FOODS_TABLE + " (" +
         DBContract.FoodItems.FOODS_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, " +
         DBContract.FoodItems.FOODS_NAME + " TEXT, " +
         DBContract.FoodItems.FOODS_CONSUMATIONDATE + " TEXT, " +
         DBContract.FoodItems.FOODS_CATEGORY + " TEXT, " +
+        DBContract.FoodItems.FOODS_SUBCATEGORY + " TEXT, " +
         DBContract.FoodItems.FOODS_USER + " TEXT )";
 
     @Override

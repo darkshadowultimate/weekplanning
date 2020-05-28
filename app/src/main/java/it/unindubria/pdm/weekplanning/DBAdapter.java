@@ -1,5 +1,6 @@
 package it.unindubria.pdm.weekplanning;
 
+import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
@@ -24,8 +25,13 @@ public class DBAdapter {
         this.dbHelper = DBHelper.getInstance(context);
     }
 
-    public DBAdapter open() throws SQLException {
+    public DBAdapter openWrite() throws SQLException {
         db = dbHelper.getWritableDatabase();
+        return this;
+    }
+
+    public DBAdapter openRead() {
+        db = dbHelper.getReadableDatabase();
         return this;
     }
 
@@ -35,9 +41,9 @@ public class DBAdapter {
 
     public long insert(Food foodItem) {
         long idFoodItem = db.insert(
-            DBContract.FoodItems.FOODS_TABLE,
-            null,
-            foodItem.obtainAsContentValue());
+                DBContract.FoodItems.FOODS_TABLE,
+                null,
+                foodItem.obtainAsContentValue());
         return idFoodItem;
     }
 
@@ -87,9 +93,10 @@ public class DBAdapter {
                 String name = cursor.getString(1);
                 String consumationDate = cursor.getString(2);
                 String categoryText = cursor.getString(3);
-                String _userId = cursor.getString(4);
+                String subCategory = cursor.getString(4);
+                String _userId = cursor.getString(5);
 
-                listFoodItemsSection.add(0, new Food(id, name, consumationDate, categoryText, _userId));
+                listFoodItemsSection.add(0, new Food(id, name, consumationDate, categoryText, subCategory, _userId));
             } while (cursor.moveToNext());
         }
 

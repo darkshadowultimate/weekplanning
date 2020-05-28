@@ -37,6 +37,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     // CONSTANTS
     private static final int ADD_ITEMS_BREAKFAST = 1;
+    private static final int ADD_ITEMS_LUNCH_DINNER = 2;
 
     // Firebase
     private FirebaseAuth mFirebaseAuth;
@@ -87,12 +88,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         // open connection to local SQLite database
         localDB = DBAdapter.getInstance(MainActivity.this);
-        localDB.open();
+        localDB.openRead();
 
         calendar = (CalendarView) findViewById(R.id.calendar);
         buttonAddBreakfast = findViewById(R.id.mainactivity_add_breakfast_button);
         buttonAddLunch = findViewById(R.id.mainactivity_add_lunch_button);
-        buttonAddDinner = findViewById(R.id.mainactivity_add_dinner_button);
+        //buttonAddDinner = findViewById(R.id.mainactivity_add_dinner_button);
 
         breakfastCard = findViewById(R.id.single_card_breakfast);
         titleBreakfastCard = findViewById(R.id.title_breakfast_card);
@@ -100,17 +101,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         buttonAddBreakfast.setOnClickListener(this);
         buttonAddLunch.setOnClickListener(this);
-        buttonAddDinner.setOnClickListener(this);
+        //buttonAddDinner.setOnClickListener(this);
         breakfastCard.setOnClickListener(this);
         setListernerCalendarView();
 
         updateUI();
-
-        //inflateLayoutTest();
     }
 
     private void updateUI() {
         ArrayList<Food> foodDateList = localDB.getAllFoodItemsDate(uid, selectedDateString);
+
+        //helper.dispayWithLog("UPDATEUI ====> ", "UPDATEUI -----" + foodDateList.toString());
 
         updateBreakfast(foodDateList);
     }
@@ -119,25 +120,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         String allItems = "";
 
         if(foodItems.size() > 0) {
-            breakfastCard.setVisibility(View.VISIBLE);
-            buttonAddBreakfast.setVisibility(View.GONE);
-
             for(Food item: foodItems) {
-                allItems += "- " + item.getName() + "\n";
+                if(item.getCategory().equals("breakfast")) {
+                    allItems += "- " + item.getName() + "\n";
+                }
             }
             foodItemBreakfast.setText(allItems);
-        } else {
+        }
+
+        if(allItems.isEmpty()) {
             if(buttonAddBreakfast.getVisibility() == View.GONE) {
                 breakfastCard.setVisibility(View.GONE);
                 buttonAddBreakfast.setVisibility(View.VISIBLE);
             }
+        } else {
+            breakfastCard.setVisibility(View.VISIBLE);
+            buttonAddBreakfast.setVisibility(View.GONE);
         }
-    }
-
-    private void inflateLayoutTest() {
-
-        // To hide and element
-        //buttonAddBreakfast.setVisibility(View.GONE);
     }
 
     @Override
@@ -150,8 +149,16 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 startActivityForResult(breakfastIntent, ADD_ITEMS_BREAKFAST);
                 break;
             case R.id.mainactivity_add_lunch_button:
+                Intent lunchIntent = new Intent(MainActivity.this, AddLunchDinner.class);
+                lunchIntent.putExtra("dateString", selectedDateString);
+                lunchIntent.putExtra("lunchOrLunch", "lunch");
+                startActivityForResult(lunchIntent, ADD_ITEMS_LUNCH_DINNER);
+                break;
             case R.id.mainactivity_add_dinner_button:
-                startActivity(helper.changeActivity(MainActivity.this, AddBreakfast.class));
+                Intent dinnerIntent = new Intent(MainActivity.this, AddLunchDinner.class);
+                dinnerIntent.putExtra("dateString", selectedDateString);
+                dinnerIntent.putExtra("lunchOrLunch", "dinner");
+                startActivityForResult(dinnerIntent, ADD_ITEMS_LUNCH_DINNER);
                 break;
         }
     }
@@ -187,24 +194,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == ADD_ITEMS_BREAKFAST) {
-            if(resultCode == Activity.RESULT_OK){
-                String stringDate = data.getStringExtra("lastSelectedDate");
-
-                try {
-                    calendar
-                    .setDate(
-                        new SimpleDateFormat("dd-MM-yyyy")
-                            .parse(stringDate)
-                            .getTime(),
-                        false,
-                        false
-                    );
-                } catch(ParseException exc) {}
+        if (requestCode == ADD_ITEMS_BREAKFAST || requestCode == ADD_ITEMS_LUNCH_DINNER) {
+            if(resultCode == Activity.RESULT_OK) {
+                updateUI();
             }
-            if (resultCode == Activity.RESULT_CANCELED) {
-                //Write your code if there's no result
-            }
+            if (resultCode == Activity.RESULT_CANCELED) {}
         }
     }
 

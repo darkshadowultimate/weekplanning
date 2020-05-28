@@ -38,10 +38,11 @@
     <string name="no_more_items_message">Max 10 elements allowed</string>
 
     <!-- LunchDinner -->
-    <string-array name="dropdown_types_meals">
-        <item>Breakfast</item>
-        <item>Lunch</item>
-        <item>Dinner</item>
+    <string-array name="dropdown_part_meal">
+        <item>Antipasto</item>
+        <item>Primo</item>
+        <item>Secondo</item>
+        <item>Fine pasto</item>
     </string-array>
     <string name="dropdown_label">Type of meal</string>
 

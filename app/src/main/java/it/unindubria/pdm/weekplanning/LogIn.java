@@ -33,6 +33,8 @@ public class LogIn extends AppCompatActivity implements View.OnClickListener {
 
         mAuth = FirebaseAuth.getInstance();
 
+        //getApplicationContext().deleteDatabase(DBContract.DB_NAME);
+
         if(mAuth.getCurrentUser() != null) {
             startActivity(helper.changeActivity(this, MainActivity.class));
         }

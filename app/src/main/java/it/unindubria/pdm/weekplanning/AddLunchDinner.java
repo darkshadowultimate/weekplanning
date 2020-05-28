@@ -6,27 +6,28 @@ import android.content.Intent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.Spinner;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.database.ChildEventListener;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
-public class AddBreakfast extends AppCompatActivity implements View.OnClickListener {
+public class AddLunchDinner extends AppCompatActivity implements View.OnClickListener {
+
+    // CONSTANTS
+    private final String[] SUBCATEGORIES_VOICES_DB = { "before", "first", "second", "after" };
 
     // Firebase
     private FirebaseAuth mFirebaseAuth;
@@ -35,15 +36,18 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
     private String uid;
 
     // class' variables
-    private ArrayList<Food> listFoodItems;
-    private ArrayAdapter<Food> adapter;
-    private ListView listView;
-
+    private ArrayList<Food> listFoodItemsLunchDinner;
+    private ArrayAdapter<Food> adapterLunchDinner;
+    private ListView listViewLunchDinner;
+    private String dateSelected;
+    private String lunchOrDinner;
+    Map<String, Integer> prioritySubCategories;
     // UI elements
     private EditText editTextFood;
     private Button addFoodItemButton;
     private Button saveButton;
-    private String dateSelected;
+    private Spinner dropdown_subcategories;
+
 
     // Helpers & Others
     private Helper helper = new Helper();
@@ -52,43 +56,52 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_breakfast);
+        setContentView(R.layout.activity_add_lunch_dinner);
 
         // setting up Firebase
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
 
         if(mFirebaseUser == null) {
-            startActivity(helper.changeActivity(AddBreakfast.this, LogIn.class));
+            startActivity(helper.changeActivity(AddLunchDinner.this, LogIn.class));
         } else {
             uid = mFirebaseUser.getUid();
             mDatabaseRef = FirebaseDatabase.getInstance().getReference();
         }
 
         // connect elements to UI
-        editTextFood = findViewById(R.id.breakfast_insert_food);
-        addFoodItemButton = findViewById(R.id.add_item_breakfast);
-        saveButton = findViewById(R.id.breakfast_finish_button);
-        listView = findViewById(R.id.breakfast_list_food_items);
+        editTextFood = findViewById(R.id.dinner_lunch_insert_food);
+        addFoodItemButton = findViewById(R.id.add_item_dinner_lunch);
+        saveButton = findViewById(R.id.dinner_lunch_finish_button);
+        listViewLunchDinner = findViewById(R.id.listview_dinner_lunch);
+        dropdown_subcategories = findViewById(R.id.dropdown_subcategory);
 
         // setting listeners
         addFoodItemButton.setOnClickListener(this);
         saveButton.setOnClickListener(this);
         handleRemoveListViewItem();
 
+        // setting variables' values
+        prioritySubCategories = new HashMap<String, Integer>();
+        prioritySubCategories.put("before", new Integer(0));
+        prioritySubCategories.put("first", new Integer(1));
+        prioritySubCategories.put("second", new Integer(2));
+        prioritySubCategories.put("after", new Integer(3));
+
         // getting data from intent
         Intent mainActivityIntent = getIntent();
         // saving the date choosen by the user already formatted
         dateSelected = mainActivityIntent.getStringExtra("dateString");
+        lunchOrDinner = mainActivityIntent.getStringExtra("lunchOrLunch");
 
         // open connection to local SQLite database
-        localDB = DBAdapter.getInstance(AddBreakfast.this);
+        localDB = DBAdapter.getInstance(AddLunchDinner.this);
         localDB.openWrite();
 
         // setting up listview and adapter
-        listFoodItems = new ArrayList<Food>();
-        adapter = new ArrayAdapter<Food>(AddBreakfast.this, android.R.layout.simple_list_item_1, listFoodItems);
-        listView.setAdapter(adapter);
+        listFoodItemsLunchDinner = new ArrayList<Food>();
+        adapterLunchDinner = new ArrayAdapter<Food>(AddLunchDinner.this, android.R.layout.simple_list_item_1, listFoodItemsLunchDinner);
+        listViewLunchDinner.setAdapter(adapterLunchDinner);
 
         // getting data from local DB SQLite
         synchronizeListFoodItemsWithLocalDB();
@@ -97,28 +110,45 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         switch(view.getId()) {
-            case R.id.add_item_breakfast:
-                if(listFoodItems.size() < 10) {
+            case R.id.add_item_dinner_lunch:
+                if(listFoodItemsLunchDinner.size() < 20) {
                     addFoodItem();
                 } else {
                     helper.displayWithDialog(
-                        AddBreakfast.this,
+                        AddLunchDinner.this,
                         R.string.no_more_items_title,
                         R.string.no_more_items_message
                     );
                 }
                 break;
-            case R.id.breakfast_finish_button:
+            case R.id.dinner_lunch_finish_button:
                 finishActivityAndGoBack();
+                break;
         }
     }
 
-    public void addFoodItem() {
-        String nameFoodItem = editTextFood.getText().toString();
-        Food food = new Food(nameFoodItem, dateSelected, "breakfast", uid);
+    private String getSubcategoryStringValueForDB(String valueSelected) {
+        for(int i = 0; i < SUBCATEGORIES_VOICES_DB.length; i++) {
+            if(dropdown_subcategories.getItemAtPosition(i).toString().equals(valueSelected)) {
+                return SUBCATEGORIES_VOICES_DB[i];
+            }
+        }
+        return null;
+    }
 
-        listFoodItems.add(0, food);
-        adapter.notifyDataSetChanged();
+    private void addFoodItem() {
+        String nameFoodItem = editTextFood.getText().toString();
+        String subcategory = getSubcategoryStringValueForDB(dropdown_subcategories.getSelectedItem().toString());
+
+        if(subcategory == null) return;
+
+        Food food = new Food(nameFoodItem, dateSelected, lunchOrDinner, subcategory, uid);
+
+        //insertItemToArrayList(food);
+        listFoodItemsLunchDinner.add(getPositionToInsertItem(food), food);
+        //sortListFoodItems(listFoodItemsLunchDinner);
+
+        adapterLunchDinner.notifyDataSetChanged();
 
         saveInfoToDB(food);
 
@@ -127,8 +157,24 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
         editTextFood.setText("");
     }
 
+    private int getPositionToInsertItem(Food foodItem) {
+        int priorityValArg = prioritySubCategories.get(foodItem.getSubcategory());
+        int counter;
+
+        for(counter = 0; counter < listFoodItemsLunchDinner.size(); counter++) {
+            int priorityValItem = prioritySubCategories
+                    .get(listFoodItemsLunchDinner
+                            .get(counter).getSubcategory());
+
+            if(priorityValArg < priorityValItem) {
+                return counter;
+            }
+        }
+        return counter;
+    }
+
     private void saveInfoToDB(Food item) {
-        if(listFoodItems.size() > 0) {
+        if(listFoodItemsLunchDinner.size() > 0) {
             // update local SQLite database
             long idItem = localDB.insert(item);
 
@@ -142,30 +188,39 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
 
     private void synchronizeListFoodItemsWithLocalDB() {
         ArrayList<Food> loadedFoodItems = localDB
-            .getAllFoodItemsSection(uid, dateSelected, "breakfast");
+                .getAllFoodItemsSection(uid, dateSelected, lunchOrDinner);
 
-        for(Food item: loadedFoodItems) {
-            listFoodItems.add(0, item);
+        sortListFoodItems(loadedFoodItems);
+    }
+
+    private void sortListFoodItems(ArrayList<Food> listToOrder) {
+        for (String valueCategory : SUBCATEGORIES_VOICES_DB) {
+            for(Food item: listToOrder) {
+                if(item.getSubcategory().equals(valueCategory)) {
+                    listFoodItemsLunchDinner.add(item);
+                }
+            }
         }
 
-        adapter.notifyDataSetChanged();
+        adapterLunchDinner.notifyDataSetChanged();
+        return;
     }
 
     private void handleRemoveListViewItem() {
-        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+        listViewLunchDinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
                 new AlertDialog
-                    .Builder(AddBreakfast.this)
+                    .Builder(AddLunchDinner.this)
                     .setTitle("Remove element")
                     .setMessage("Do you really wanna remove this element?")
                     .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            Food item = listFoodItems.get(position);
+                            Food item = listFoodItemsLunchDinner.get(position);
 
-                            listFoodItems.remove(position);
-                            adapter.notifyDataSetChanged();
+                            listFoodItemsLunchDinner.remove(position);
+                            adapterLunchDinner.notifyDataSetChanged();
 
                             localDB.removeFoodItem(item.getId());
 
@@ -179,7 +234,6 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
     }
 
     private void finishActivityAndGoBack() {
-        //localDB.close();
         setResult(Activity.RESULT_OK, new Intent());
         finish();
     }

@@ -6,15 +6,25 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fillViewport="true">
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:context=".AddBreakfast"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:context=".AddLunchDinner">
 
         <include
             android:id="@+id/custom_toolbar"
             layout="@layout/toolbar" />
+
+        <Spinner
+            android:id="@+id/dropdown_subcategory"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="20dp"
+            android:paddingVertical="10dp"
+            android:entries="@array/dropdown_part_meal"/>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -24,9 +34,8 @@
             android:layout_marginTop="20dp"
             android:padding="5dp">
 
-
             <EditText
-                android:id="@+id/breakfast_insert_food"
+                android:id="@+id/dinner_lunch_insert_food"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -36,7 +45,7 @@
                 android:hint="@string/insert_item_breakfast" />
 
             <Button
-                android:id="@+id/add_item_breakfast"
+                android:id="@+id/add_item_dinner_lunch"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
@@ -44,9 +53,9 @@
         </LinearLayout>
 
         <ListView
-            android:id="@+id/breakfast_list_food_items"
+            android:id="@+id/listview_dinner_lunch"
             android:layout_width="match_parent"
-            android:layout_height="260dp"
+            android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp" />
 
         <Button
@@ -58,7 +67,7 @@
             android:text="TAKE A PICTURE" />
 
         <Button
-            android:id="@+id/breakfast_finish_button"
+            android:id="@+id/dinner_lunch_finish_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
