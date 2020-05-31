@@ -32,9 +32,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class AddBreakfast extends AppCompatActivity implements View.OnClickListener {
-
     // CONSTANTS
-    private static final int TAKE_PHOTO_CODE = 10;
+    private static final int CAMERA = 10;
+    private static final int READ_WRITE_FROM_STORAGE = 5;
+    private static final int TAKE_PHOTO_CODE = 11;
 
     // Firebase
     private FirebaseAuth mFirebaseAuth;
@@ -56,6 +57,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
 
     // Helpers & Others
     private Helper helper = new Helper();
+    private HandleAddMeals handleAddMeals = new HandleAddMeals();
     private DBAdapter localDB;
 
     @Override
@@ -96,8 +98,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
         localDB = DBAdapter.getInstance(AddBreakfast.this);
         localDB.openWrite();
 
-        helper.createNewDirectory("/WeekPlanning/" + uid + "/" + dateSelected);
-        setPreviewImage();
+        handleAddMeals.setPreviewImage(uid, dateSelected, "breakfast", previewImage, AddBreakfast.this, AddBreakfast.this);
 
         // setting up listview and adapter
         listFoodItems = new ArrayList<Food>();
@@ -123,49 +124,10 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
                 }
                 break;
             case R.id.take_picture_button:
-                handleTakePicture();
+                takePictureFromCamera();
                 break;
             case R.id.breakfast_finish_button:
                 finishActivityAndGoBack();
-        }
-    }
-
-    private void setPreviewImage() {
-        String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/WeekPlanning/" + uid + "/" + dateSelected + "/breakfast/" + uid + "_" + dateSelected + ".png";
-        File imgFile = new File(filePath);
-
-        if(imgFile.exists()){
-            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-            previewImage.setImageBitmap(myBitmap);
-        }
-    }
-
-    private void handleTakePicture() {
-        if (ContextCompat.checkSelfPermission(AddBreakfast.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                AddBreakfast.this,
-                new String[] {
-                    Manifest.permission.CAMERA
-                },
-                TAKE_PHOTO_CODE
-            );
-        } else {
-            helper.createNewDirectory("/WeekPlanning/" + uid + "/" + dateSelected + "/breakfast");
-
-            String file = Environment.getExternalStorageDirectory().getAbsolutePath() + "/WeekPlanning/" + uid + "/" + dateSelected + "/breakfast/" + uid + "_" + dateSelected + ".png";
-            File newfile = new File(file);
-            try {
-                newfile.createNewFile();
-            }
-            catch (IOException e) {
-                helper.displayWithToast(AddBreakfast.this, "File not created");
-            }
-
-            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-            if(cameraIntent.resolveActivity(getPackageManager()) != null) {
-                startActivityForResult(cameraIntent, TAKE_PHOTO_CODE);
-            }
         }
     }
 
@@ -181,6 +143,14 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
         // The user could add more items at the time.
         // Clearing the focus and hiding the keyboard would be bad UX.
         editTextFood.setText("");
+    }
+
+    private void takePictureFromCamera() {
+        Intent cameraIntent = handleAddMeals.takePicture(uid, dateSelected, "breakfast", AddBreakfast.this, AddBreakfast.this);
+
+        if(cameraIntent != null && cameraIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(cameraIntent, TAKE_PHOTO_CODE);
+        }
     }
 
     private void saveInfoToDB(Food item) {
@@ -206,11 +176,18 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == TAKE_PHOTO_CODE) {
+        if (requestCode == CAMERA) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                handleTakePicture();
+                helper.displayWithToast(AddBreakfast.this, "Now you can take pictures!");
             } else {
-                helper.displayWithToast(AddBreakfast.this, "You won't be able to take pictures");
+                helper.displayWithToast(AddBreakfast.this, "Cannot to take or save pictures");
+            }
+        } else if (requestCode == READ_WRITE_FROM_STORAGE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                handleAddMeals.setPreviewImage(uid, dateSelected, "breakfast", previewImage, AddBreakfast.this, AddBreakfast.this);
+                helper.displayWithToast(AddBreakfast.this, "Take your picture again, please.");
+            } else {
+                helper.displayWithToast(AddBreakfast.this, "Cannot to take or save pictures");
             }
         }
     }
@@ -220,14 +197,9 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == TAKE_PHOTO_CODE && resultCode == RESULT_OK) {
-            Bitmap imageBitmap = (Bitmap) data.getExtras().get("data");
-            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/WeekPlanning/" + uid + "/" + dateSelected + "/breakfast/" + uid + "_" + dateSelected + ".png");
-
-            helper.displayWithToast(AddBreakfast.this, "THE IMAGE HAS BEEN TAKEN");
-            try (FileOutputStream out = new FileOutputStream(file)) {
-                imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, out); // bmp is your Bitmap instance
-
-                setPreviewImage();
+            try {
+                handleAddMeals.savePictureToStorage(data, uid, dateSelected, "breakfast", AddBreakfast.this);
+                handleAddMeals.setPreviewImage(uid, dateSelected, "breakfast", previewImage, AddBreakfast.this, AddBreakfast.this);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -251,8 +223,6 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
                             adapter.notifyDataSetChanged();
 
                             localDB.removeFoodItem(item.getId());
-
-                            //TODO: REMOVE ITEM FROM FIREBASE TOO
                         }
                     })
                     .setNegativeButton("No", null)

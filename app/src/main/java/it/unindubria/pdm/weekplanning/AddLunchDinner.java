@@ -38,7 +38,9 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
 
     // CONSTANTS
     private final String[] SUBCATEGORIES_VOICES_DB = { "before", "first", "second", "after" };
-    private static final int TAKE_PHOTO_CODE = 10;
+    private static final int CAMERA = 10;
+    private static final int READ_WRITE_FROM_STORAGE = 5;
+    private static final int TAKE_PHOTO_CODE = 11;
 
     // Firebase
     private FirebaseAuth mFirebaseAuth;
@@ -64,6 +66,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
 
     // Helpers & Others
     private Helper helper = new Helper();
+    private HandleAddMeals handleAddMeals = new HandleAddMeals();
     private DBAdapter localDB;
 
     @Override
@@ -113,9 +116,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         localDB = DBAdapter.getInstance(AddLunchDinner.this);
         localDB.openWrite();
 
-        helper.createNewDirectory("/WeekPlanning/" + uid + "/" + dateSelected);
-
-        setPreviewImage();
+        handleAddMeals.setPreviewImage(uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this, AddLunchDinner.this);
 
         // setting up listview and adapter
         listFoodItemsLunchDinner = new ArrayList<Food>();
@@ -141,50 +142,11 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
                 }
                 break;
             case R.id.take_picture_button:
-                handleTakePicture();
+                takePictureFromCamera();
                 break;
             case R.id.dinner_lunch_finish_button:
                 finishActivityAndGoBack();
                 break;
-        }
-    }
-
-    private void setPreviewImage() {
-        String filePath = Environment.getExternalStorageDirectory().getAbsolutePath() + "/WeekPlanning/" + uid + "/" + dateSelected + "/" + lunchOrDinner + "/" + uid + "_" + dateSelected + ".png";
-        File imgFile = new File(filePath);
-
-        if(imgFile.exists()) {
-            Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-            previewImage.setImageBitmap(myBitmap);
-        }
-    }
-
-    private void handleTakePicture() {
-        if (ContextCompat.checkSelfPermission(AddLunchDinner.this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(
-                    AddLunchDinner.this,
-                    new String[] {
-                            Manifest.permission.CAMERA
-                    },
-                    TAKE_PHOTO_CODE
-            );
-        } else {
-            helper.createNewDirectory("/WeekPlanning/" + uid + "/" + dateSelected + "/" + lunchOrDinner);
-
-            String file = Environment.getExternalStorageDirectory().getAbsolutePath() + "/WeekPlanning/" + uid + "/" + dateSelected + "/" + lunchOrDinner + "/" + uid + "_" + dateSelected + ".png";
-            File newfile = new File(file);
-            try {
-                newfile.createNewFile();
-            }
-            catch (IOException e) {
-                helper.displayWithToast(AddLunchDinner.this, "File not created");
-            }
-
-            Intent cameraIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
-            if(cameraIntent.resolveActivity(getPackageManager()) != null) {
-                startActivityForResult(cameraIntent, TAKE_PHOTO_CODE);
-            }
         }
     }
 
@@ -195,6 +157,14 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
             }
         }
         return null;
+    }
+
+    private void takePictureFromCamera() {
+        Intent cameraIntent = handleAddMeals.takePicture(uid, dateSelected, lunchOrDinner, AddLunchDinner.this, AddLunchDinner.this);
+
+        if(cameraIntent != null && cameraIntent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(cameraIntent, TAKE_PHOTO_CODE);
+        }
     }
 
     private void addFoodItem() {
@@ -266,11 +236,18 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == TAKE_PHOTO_CODE) {
+        if (requestCode == CAMERA) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                handleTakePicture();
+                helper.displayWithToast(AddLunchDinner.this, "Now you can take pictures!");
             } else {
-                helper.displayWithToast(AddLunchDinner.this, "You won't be able to take pictures");
+                helper.displayWithToast(AddLunchDinner.this, "Cannot to take or save pictures");
+            }
+        } else if (requestCode == READ_WRITE_FROM_STORAGE) {
+            if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                handleAddMeals.setPreviewImage(uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this, AddLunchDinner.this);
+                helper.displayWithToast(AddLunchDinner.this, "Take your picture again, please.");
+            } else {
+                helper.displayWithToast(AddLunchDinner.this, "Cannot to take or save pictures");
             }
         }
     }
@@ -280,13 +257,9 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == TAKE_PHOTO_CODE && resultCode == RESULT_OK) {
-            Bitmap imageBitmap = (Bitmap) data.getExtras().get("data");
-            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + "/WeekPlanning/" + uid + "/" + dateSelected + "/" + lunchOrDinner + "/" + uid + "_" + dateSelected + ".png");
-
-            helper.displayWithToast(AddLunchDinner.this, "THE IMAGE HAS BEEN TAKEN");
-            try (FileOutputStream out = new FileOutputStream(file)) {
-                imageBitmap.compress(Bitmap.CompressFormat.PNG, 100, out);
-                setPreviewImage();
+            try {
+                handleAddMeals.savePictureToStorage(data, uid, dateSelected, lunchOrDinner, AddLunchDinner.this);
+                handleAddMeals.setPreviewImage(uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this, AddLunchDinner.this);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -310,8 +283,6 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
                             adapterLunchDinner.notifyDataSetChanged();
 
                             localDB.removeFoodItem(item.getId());
-
-                            //TODO: REMOVE ITEM FROM FIREBASE TOO
                         }
                     })
                     .setNegativeButton("No", null)

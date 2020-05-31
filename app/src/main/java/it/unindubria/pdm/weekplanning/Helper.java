@@ -27,12 +27,25 @@ public class Helper extends AppCompatActivity {
         return intent;
     }
 
+    public void createDirectoryStructure(String uid, String date, String category) {
+        String
+            basePath = "/WeekPlanning",
+            uidPath = basePath + "/" + uid,
+            datePath = uidPath + "/" + date,
+            categoryPath = datePath + "/" + category;
+
+        createNewDirectory(basePath);
+        createNewDirectory(uidPath);
+        createNewDirectory(datePath);
+        createNewDirectory(categoryPath);
+    }
+
     public void createNewDirectory(String restOfPath) {
         String absolutePathAppDirectory = Environment.getExternalStorageDirectory().getAbsolutePath() + restOfPath;
         Path path = Paths.get(absolutePathAppDirectory);
 
         if(Files.notExists(path)) {
-            dispayWithLog("CREATING DIRECTORY", "DIRECTORY DOESN'T EXISTS");
+            //dispayWithLog("CREATING DIRECTORY", "DIRECTORY DOESN'T EXISTS");
             File dir = new File(absolutePathAppDirectory);
             try{
                 dir.mkdir();
@@ -40,7 +53,7 @@ public class Helper extends AppCompatActivity {
                 e.printStackTrace();
             }
         } else {
-            dispayWithLog("CREATING DIRECTORY", "DIRECTORY ALREADY EXISTS");
+            //dispayWithLog("CREATING DIRECTORY", "DIRECTORY ALREADY EXISTS");
         }
     }
 
