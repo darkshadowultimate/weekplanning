@@ -257,12 +257,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == TAKE_PHOTO_CODE && resultCode == RESULT_OK) {
-            try {
-                handleAddMeals.savePictureToStorage(data, uid, dateSelected, lunchOrDinner, AddLunchDinner.this);
-                handleAddMeals.setPreviewImage(uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this, AddLunchDinner.this);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            handleAddMeals.setPreviewImage(uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this, AddLunchDinner.this);
         }
     }
 

@@ -197,12 +197,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == TAKE_PHOTO_CODE && resultCode == RESULT_OK) {
-            try {
-                handleAddMeals.savePictureToStorage(data, uid, dateSelected, "breakfast", AddBreakfast.this);
-                handleAddMeals.setPreviewImage(uid, dateSelected, "breakfast", previewImage, AddBreakfast.this, AddBreakfast.this);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            handleAddMeals.setPreviewImage(uid, dateSelected, "breakfast", previewImage, AddBreakfast.this, AddBreakfast.this);
         }
     }
 

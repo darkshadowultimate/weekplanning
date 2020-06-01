@@ -6,8 +6,8 @@
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"></uses-permission>
 
     <uses-feature
-        android:name="android.hardware.Camera"
-        android:required="true" />
+        android:name="android.hardware"
+        android:required="false" />
 
     <application
         android:allowBackup="true"
@@ -16,6 +16,15 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
+        <provider
+            android:authorities="com.example.android.fileprovider"
+            android:name="android.support.v4.content.FileProvider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
         <activity android:name=".LogIn">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -26,7 +35,7 @@
         <activity android:name=".SignUp" />
         <activity android:name=".MainActivity" />
         <activity android:name=".AddBreakfast" />
-        <activity android:name=".AddLunchDinner"></activity>
+        <activity android:name=".AddLunchDinner" />
     </application>
 
 </manifest>

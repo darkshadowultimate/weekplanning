@@ -7,10 +7,12 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.widget.ImageView;
 
 import java.io.File;
@@ -66,35 +68,27 @@ public class HandleAddMeals {
 
             try {
                 newfile.createNewFile();
+
+                Uri photoUri = FileProvider.getUriForFile(
+                        context,
+                        "com.example.android.fileprovider",
+                        newfile
+                );
+
+                Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
+
+                return takePhotoIntent;
             }
             catch (IOException e) {
                 helper.displayWithToast(context, "File not created");
             }
 
-            return new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+            return null;
         } else {
             requestPermissions(activity, new String[] { Manifest.permission.CAMERA, Manifest.permission.WRITE_EXTERNAL_STORAGE }, CAMERA);
 
             return null;
-        }
-    }
-
-    public void savePictureToStorage(
-            Intent data,
-            String uid,
-            String date,
-            String category,
-            Context context
-    ) throws IOException {
-
-        if(hasAppPermissions(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            Bitmap imageBitmap = (Bitmap) data.getExtras().get("data");
-            File file = new File(Environment.getExternalStorageDirectory().getAbsolutePath() + BASE_DIRECTORY_PATH + "/" + uid + "/" + date + "/" + category + "/" + uid + "_" + date + EXTENSION_IMAGES);
-
-            FileOutputStream out = new FileOutputStream(file);
-            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, out);
-        } else {
-            helper.displayWithToast(context, "Allow this app to access storage in app's settings");
         }
     }
 

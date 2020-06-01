@@ -61,7 +61,10 @@
         <ImageView
             android:id="@+id/preview_image_meal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:maxHeight="300dp"
+            android:adjustViewBounds="true"
+            android:layout_marginHorizontal="5dp" />
 
         <Button
             android:id="@+id/take_picture_button"
