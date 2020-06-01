@@ -3,6 +3,7 @@ package it.unindubria.pdm.weekplanning;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -13,6 +14,7 @@ import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.FileProvider;
+import android.support.v7.app.AlertDialog;
 import android.widget.ImageView;
 
 import java.io.File;
@@ -53,6 +55,23 @@ public class HandleAddMeals {
         );
     }
 
+    private File getImageFile(String uid, String date, String category) {
+        String file = absolutePath + BASE_DIRECTORY_PATH + "/" + uid + "/" + date + "/" + category + "/" + uid + "_" + date + EXTENSION_IMAGES;
+        return new File(file);
+    }
+
+    private File getDirectory(String uid, String date, String category) {
+        if(uid == null && date == null && category == null) {
+            return new File(absolutePath + BASE_DIRECTORY_PATH);
+        } else if(date == null && category == null) {
+            return new File(absolutePath + BASE_DIRECTORY_PATH + "/" + uid);
+        } else if(category == null) {
+            return new File(absolutePath + BASE_DIRECTORY_PATH + "/" + uid + "/" + date);
+        } else {
+            return new File(absolutePath + BASE_DIRECTORY_PATH + "/" + uid + "/" + date + "/" + category);
+        }
+    }
+
     public Intent takePicture(
         String uid,
         String date,
@@ -63,8 +82,7 @@ public class HandleAddMeals {
         if(hasAppPermissions(context, Manifest.permission.CAMERA) && hasAppPermissions(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             helper.createDirectoryStructure(uid, date, category);
 
-            String file = absolutePath + BASE_DIRECTORY_PATH + "/" + uid + "/" + date + "/" + category + "/" + uid + "_" + date + EXTENSION_IMAGES;
-            File newfile = new File(file);
+            File newfile = getImageFile(uid, date, category);
 
             try {
                 newfile.createNewFile();
@@ -92,6 +110,36 @@ public class HandleAddMeals {
         }
     }
 
+    private void deleteDirectoryOrFile(File dirToDelete) {
+        dirToDelete.delete();
+    }
+
+    private void clearEmptyDirectories(String uid, String date, String category) {
+        // directory of the section that contained the image (breakfast, lunch, dinner)
+        File currentDirectory = getDirectory(uid, date, category);
+
+        // if it's empty it needs to be removed
+        if(currentDirectory.exists() && currentDirectory.list().length == 0) {
+            deleteDirectoryOrFile(currentDirectory);
+        }
+
+        // directory of a specific date which can contain the categories' folders
+        currentDirectory = getDirectory(uid, date, null);
+
+        // if it's empty it needs to be removed
+        if(currentDirectory.exists() && currentDirectory.list().length == 0) {
+            deleteDirectoryOrFile(currentDirectory);
+        }
+
+        // directory of the current user which contains all his meals' pictures
+        currentDirectory = getDirectory(uid, null, null);
+
+        // if it's empty it needs to be removed
+        if(currentDirectory.exists() && currentDirectory.list().length == 0) {
+            deleteDirectoryOrFile(currentDirectory);
+        }
+    }
+
     public void setPreviewImage(
         String uid,
         String date,
@@ -101,15 +149,46 @@ public class HandleAddMeals {
         Activity activity
     ) {
         if(hasAppPermissions(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
-            String filePath = absolutePath + BASE_DIRECTORY_PATH + "/" + uid + "/" + date + "/" + category + "/" + uid + "_" + date + EXTENSION_IMAGES;
-            File imgFile = new File(filePath);
+            File imgFile = getImageFile(uid, date, category);
 
             if(imgFile.exists()) {
-                Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
-                previewImage.setImageBitmap(myBitmap);
+                if(imgFile.length() > 0) {
+                    Bitmap myBitmap = BitmapFactory.decodeFile(imgFile.getAbsolutePath());
+
+                    previewImage.setMaxHeight(680);
+                    previewImage.setImageBitmap(myBitmap);
+                } else {
+                    imgFile.delete();
+                }
             }
         } else {
             requestPermissions(activity, new String[] { Manifest.permission.WRITE_EXTERNAL_STORAGE }, READ_WRITE_FROM_STORAGE);
+        }
+    }
+
+    public void deleteImage(final String uid, final String date, final String category, final ImageView previewImage, Context context)  {
+        final File fileToDelete = getImageFile(uid, date, category);
+
+        if(fileToDelete.exists()) {
+            new AlertDialog
+                .Builder(context)
+                .setTitle("Remove element")
+                .setMessage("Do you really wanna remove this element?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // delete image
+                        deleteDirectoryOrFile(fileToDelete);
+                        // delete parents empty directories
+                        clearEmptyDirectories(uid, date, category);
+                        // clear the data contained inside the ImageView UI element
+                        // (to show the user that the image was deleted)
+                        previewImage.setImageBitmap(null);
+                        previewImage.setMaxHeight(0);
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
         }
     }
 }

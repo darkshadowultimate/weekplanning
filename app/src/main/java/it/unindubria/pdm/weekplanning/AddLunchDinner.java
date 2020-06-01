@@ -97,6 +97,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         addFoodItemButton.setOnClickListener(this);
         takePicture.setOnClickListener(this);
         saveButton.setOnClickListener(this);
+        previewImage.setOnClickListener(this);
         handleRemoveListViewItem();
 
         // setting variables' values
@@ -140,6 +141,9 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
                         R.string.no_more_items_message
                     );
                 }
+                break;
+            case R.id.preview_image_meal:
+                handleAddMeals.deleteImage(uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this);
                 break;
             case R.id.take_picture_button:
                 takePictureFromCamera();

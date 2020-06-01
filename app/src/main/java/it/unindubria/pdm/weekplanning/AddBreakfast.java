@@ -87,6 +87,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
         addFoodItemButton.setOnClickListener(this);
         takePicture.setOnClickListener(this);
         saveButton.setOnClickListener(this);
+        previewImage.setOnClickListener(this);
         handleRemoveListViewItem();
 
         // getting data from intent
@@ -122,6 +123,9 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
                         R.string.no_more_items_message
                     );
                 }
+                break;
+            case R.id.preview_image_meal:
+                handleAddMeals.deleteImage(uid, dateSelected, "breakfast", previewImage, AddBreakfast.this);
                 break;
             case R.id.take_picture_button:
                 takePictureFromCamera();

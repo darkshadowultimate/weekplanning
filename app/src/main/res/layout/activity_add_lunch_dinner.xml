@@ -62,7 +62,7 @@
             android:id="@+id/preview_image_meal"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:maxHeight="300dp"
+            android:maxHeight="200dp"
             android:adjustViewBounds="true"
             android:layout_marginHorizontal="5dp" />
 
@@ -70,7 +70,7 @@
             android:id="@+id/take_picture_button"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="40dp"
             android:layout_marginHorizontal="20dp"
             android:text="TAKE A PICTURE" />
 
