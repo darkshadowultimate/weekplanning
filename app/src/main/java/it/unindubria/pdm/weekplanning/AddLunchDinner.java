@@ -179,6 +179,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
 
         Food food = new Food(nameFoodItem, dateSelected, lunchOrDinner, subcategory, uid);
 
+        food.setSubcategoryTranslation(getTranslationSubcategory(food.getSubcategory()));
         //insertItemToArrayList(food);
         listFoodItemsLunchDinner.add(getPositionToInsertItem(food), food);
         //sortListFoodItems(listFoodItemsLunchDinner);
@@ -217,6 +218,11 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         }
     }
 
+    private String getTranslationSubcategory(String keyword) {
+        int idString = getResources().getIdentifier(keyword, "string", getPackageName());
+        return getString(idString);
+    }
+
     private void synchronizeListFoodItemsWithLocalDB() {
         ArrayList<Food> loadedFoodItems = localDB
                 .getAllFoodItemsSection(uid, dateSelected, lunchOrDinner);
@@ -228,6 +234,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         for (String valueCategory : SUBCATEGORIES_VOICES_DB) {
             for(Food item: listToOrder) {
                 if(item.getSubcategory().equals(valueCategory)) {
+                    item.setSubcategoryTranslation(getTranslationSubcategory(item.getSubcategory()));
                     listFoodItemsLunchDinner.add(item);
                 }
             }

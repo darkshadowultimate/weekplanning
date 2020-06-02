@@ -39,11 +39,15 @@
 
     <!-- LunchDinner -->
     <string-array name="dropdown_part_meal">
-        <item>Antipasto</item>
-        <item>Primo</item>
-        <item>Secondo</item>
-        <item>Fine pasto</item>
+        <item>Starter</item>
+        <item>First course</item>
+        <item>Second course</item>
+        <item>End of meal</item>
     </string-array>
+    <string name="before">STARTER</string>
+    <string name="first">FIRST COURSE</string>
+    <string name="second">SECOND COURSE</string>
+    <string name="after">END OF MEAL</string>
     <string name="dropdown_label">Type of meal</string>
 
 </resources>

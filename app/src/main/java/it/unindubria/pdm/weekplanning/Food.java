@@ -9,6 +9,7 @@ public class Food {
     private String consumationDate;
     private String category;
     private String subcategory;
+    private String subcategoryTranslation;
     private String userId;
 
     // in order to work with DataSnapshot (Firebase),
@@ -93,6 +94,10 @@ public class Food {
         this.subcategory = subcategory;
     }
 
+    public void setSubcategoryTranslation(String subcategoryTranslation) {
+        this.subcategoryTranslation = subcategoryTranslation;
+    }
+
     public void setUserId(String userId) {
         this.userId = userId;
     }
@@ -115,6 +120,6 @@ public class Food {
 
     @Override
     public String toString() {
-        return name + (this.subcategory != null && !this.subcategory.isEmpty() ? " - " + this.subcategory : "");
+        return name + (this.subcategory != null && !this.subcategory.isEmpty() ? " - " + this.subcategoryTranslation : "");
     }
 }
