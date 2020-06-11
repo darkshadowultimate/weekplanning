@@ -1,34 +1,37 @@
 package it.unindubria.pdm.weekplanning;
 
-import android.Manifest;
-import android.content.pm.PackageManager;
+import android.content.Intent;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.GoogleAuthProvider;
 
 public class LogIn extends AppCompatActivity implements View.OnClickListener {
 
     //TODO: ASKS FOR GOOGLE CALENDAR PERMISSIONS
 
-    // Firebase
+    private static final int SIGN_IN_ACTIVITY_CODE = 88;
+
+    // Firebase & Google API for sign in
     private FirebaseAuth mAuth;
+    private GoogleSignInClient mGoogleSignInClient;
 
     // UI elements
-    private EditText emailField;
-    private EditText passwordField;
     private Button loginButton;
-    private TextView linkSignUpPage;
 
     // Helpers & Others
     private Helper helper = new Helper();
@@ -38,6 +41,8 @@ public class LogIn extends AppCompatActivity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
 
+        mGoogleSignInClient = GoogleSignInMiddleware
+                .getGoogleSignInClient(getString(R.string.default_web_client_id), LogIn.this);
         mAuth = FirebaseAuth.getInstance();
 
         //getApplicationContext().deleteDatabase(DBContract.DB_NAME);
@@ -46,13 +51,9 @@ public class LogIn extends AppCompatActivity implements View.OnClickListener {
             startActivity(helper.changeActivity(this, MainActivity.class));
         }
 
-        emailField = findViewById(R.id.email_field);
-        passwordField = findViewById(R.id.password_field);
         loginButton = findViewById(R.id.login_button);
-        linkSignUpPage = findViewById(R.id.signup_link);
 
         loginButton.setOnClickListener(this);
-        linkSignUpPage.setOnClickListener(this);
     }
 
     @Override
@@ -60,44 +61,51 @@ public class LogIn extends AppCompatActivity implements View.OnClickListener {
         if(view.getId() == R.id.login_button) {
             // login
             login();
-        } else if(view.getId() == R.id.signup_link) {
-            // go to create a new account page
-            startActivity(helper.changeActivity(this, SignUp.class));
+        }
+    }
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
+        if (requestCode == SIGN_IN_ACTIVITY_CODE) {
+            Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
+            try {
+                // Google Sign In was successful, authenticate with Firebase
+                GoogleSignInAccount account = task.getResult(ApiException.class);
+                Log.d("ON ACTIVITY RESULT", "firebaseAuthWithGoogle:" + account.getEmail());
+                firebaseAuthWithGoogle(account.getIdToken());
+            } catch (ApiException e) {
+                // Google Sign In failed, update UI appropriately
+                Log.w("ON ACTIVITY RESULT", "Google sign in failed", e);
+            }
         }
     }
 
     private void login() {
-        String email = emailField.getText().toString();
-        String password = passwordField.getText().toString();
+        Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+        startActivityForResult(signInIntent, SIGN_IN_ACTIVITY_CODE);
+    }
 
-        if(email.isEmpty() || password.isEmpty()) {
-            helper.displayWithDialog(
-                this,
-                R.string.error_title,
-                R.string.login_error_fields
-            );
-        } else {
-            mAuth
-            .signInWithEmailAndPassword(email, password)
-            .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
+    public void firebaseAuthWithGoogle(String idToken) {
+        AuthCredential credential = GoogleAuthProvider.getCredential(idToken, null);
+
+        mAuth
+            .signInWithCredential(credential)
+            .addOnCompleteListener(LogIn.this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
                     if (task.isSuccessful()) {
-                        helper.displayWithToast(
-                            getApplicationContext(),
-                            R.string.login_success
-                        );
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d("GOOGLE SIGNIN", "signInWithCredential:success");
                         startActivity(helper.changeActivity(LogIn.this, MainActivity.class));
                     } else {
                         // If sign in fails, display a message to the user.
-                        helper.displayWithDialog(
-                            LogIn.this,
-                            R.string.error_title,
-                            R.string.login_error_auth
-                        );
+                        Log.w("GOOGLE SIGNIN", "signInWithCredential:failure", task.getException());
+                        //Snackbar.make(mBinding.mainLayout, "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
                     }
                 }
             });
-        }
     }
 }

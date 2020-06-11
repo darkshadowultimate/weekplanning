@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">WeekPlanning</string>
 
+    <!-- -->
+    <!-- <string name="default_web_client_id">1032750953334-echi2f2l2nllpafbst482feef9l2ae37.apps.googleusercontent.com</string> -->
+
     <!-- Menu items -->
     <string name="logout">LOGOUT</string>
 
@@ -15,15 +18,7 @@
     <string name="login_success">You\'re logged in</string>
 
     <!-- LogIn / SignUp -->
-    <string name="email_placeholder">Insert e-mail...</string>
-    <string name="password_placeholder">Insert password...</string>
     <string name="login_button_text">LOGIN</string>
-    <string name="signup_link_text">Create a new account</string>
-
-    <!-- SignUp -->
-    <string name="signup_username_placeholder">Insert username...</string>
-    <string name="signup_button_text">CREATE ACCOUNT</string>
-    <string name="login_link_text">Login into your account</string>
 
     <!-- MainActivity -->
     <string name="mainactivity_click_calendar">You\'ve clicked on the day</string>
