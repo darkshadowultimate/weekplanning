@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.TextView;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
@@ -15,14 +14,13 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.common.api.ApiException;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.GoogleAuthProvider;
 
 public class LogIn extends AppCompatActivity implements View.OnClickListener {
-
-    //TODO: ASKS FOR GOOGLE CALENDAR PERMISSIONS
 
     private static final int SIGN_IN_ACTIVITY_CODE = 88;
 
@@ -41,7 +39,7 @@ public class LogIn extends AppCompatActivity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
 
-        mGoogleSignInClient = GoogleSignInMiddleware
+        mGoogleSignInClient = GoogleAPIHelper
                 .getGoogleSignInClient(getString(R.string.default_web_client_id), LogIn.this);
         mAuth = FirebaseAuth.getInstance();
 
@@ -75,10 +73,11 @@ public class LogIn extends AppCompatActivity implements View.OnClickListener {
                 // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 Log.d("ON ACTIVITY RESULT", "firebaseAuthWithGoogle:" + account.getEmail());
+
                 firebaseAuthWithGoogle(account.getIdToken());
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
-                Log.w("ON ACTIVITY RESULT", "Google sign in failed", e);
+                Log.e("ON ACTIVITY RESULT", "Google sign in failed", e);
             }
         }
     }

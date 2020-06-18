@@ -1,47 +1,53 @@
 package it.unindubria.pdm.weekplanning;
 
 import android.app.Activity;
-import android.content.Context;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.LayoutInflater;
+import android.util.Log;
 import android.view.Menu;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.CalendarView;
-import android.widget.FrameLayout;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
+import com.google.api.client.util.DateTime;
+import com.google.api.services.calendar.Calendar;
+import com.google.api.services.calendar.model.Event;
+import com.google.api.services.calendar.model.EventAttendee;
+import com.google.api.services.calendar.model.EventDateTime;
+import com.google.api.services.calendar.model.EventReminder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Locale;
+import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     // CONSTANTS
     private static final int ADD_ITEMS_BREAKFAST = 1;
     private static final int ADD_ITEMS_LUNCH_DINNER = 2;
+    private static final int REQUEST_CODE_NEED_PERMISSION = 222;
     private final String[] SUBCATEGORIES_VOICES_DB = { "before", "first", "second", "after" };
 
     // Firebase
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
     private String uid;
+    // Google Calendar API
+    private Calendar service;
 
     // class' variables
     private String selectedDateString;
@@ -91,6 +97,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         Toolbar toolbar = (Toolbar) findViewById(R.id.custom_toolbar);
         setSupportActionBar(toolbar);
 
+        service = GoogleCalendarHelper.getCalendarBuilderInstance(
+                    MainActivity.this,
+                    mFirebaseUser.getEmail()
+                );
+
+        /*
+            new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    boolean result = GoogleCalendarHelper.createNewCalendar(service);
+                    Log.d("CREATE_NEW_CALENDAR", String.valueOf(result));
+                }
+            });
+        */
+
         // open connection to local SQLite database
         localDB = DBAdapter.getInstance(MainActivity.this);
         localDB.openRead();
@@ -119,10 +140,31 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         updateUI();
     }
 
+    private void insertMealGoogleCalendar(
+            final String summary,
+            final String description,
+            final String date,
+            final String timeStart,
+            final String timeEnd
+    ) {
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    GoogleCalendarHelper.createNewEvent(service, summary, description, date, timeStart, timeEnd);
+                } catch(UserRecoverableAuthIOException exc) {
+                    MainActivity.this.startActivityForResult(
+                        exc.getIntent(),
+                        MainActivity.REQUEST_CODE_NEED_PERMISSION
+                    );
+                } catch (IOException exc) {
+                    Log.e("CALENDAR INFO", "ERROR CALENDAR READING ID", exc);
+                }
+            }
+        }).start();
+    }
+
     private void updateUI() {
         ArrayList<Food> foodDateList = localDB.getAllFoodItemsDate(uid, selectedDateString);
-
-        helper.dispayWithLog("UPDATEUI ====> ", foodDateList.toString());
 
         updateBreakfast(foodDateList);
         updateLunch(foodDateList, "lunch");
@@ -150,8 +192,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void updateLunch(ArrayList<Food> foodItems, String lunchOrDinner) {
         boolean isThereLunch = false;
-
-        //lunch_before_subcategory
 
         for(String subcategory: SUBCATEGORIES_VOICES_DB) {
             String allItems = "";
@@ -268,7 +308,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         FirebaseAuth.getInstance().signOut();
 
-        GoogleSignInClient googleClient = GoogleSignInMiddleware.getGoogleSignInClient(getString(R.string.default_web_client_id), MainActivity.this);
+        GoogleSignInClient googleClient = GoogleAPIHelper.getGoogleSignInClient(getString(R.string.default_web_client_id), MainActivity.this);
         // Google sign out
         googleClient
             .signOut()
@@ -277,7 +317,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                        startActivity(helper.changeActivity(MainActivity.this, LogIn.class));
+                    startActivity(helper.changeActivity(MainActivity.this, LogIn.class));
                     }
                 }
             );

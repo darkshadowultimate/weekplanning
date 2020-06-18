@@ -5,8 +5,19 @@
     <color name="colorAccent">#FF4081</color>
     <color name="colorTextToolbar">#FFFFFF</color>
 
-    <!-- MainActivity -->
-    <color name="colorCardMealBreakfast">#6bdf6e</color>
-    <color name="colorCardMealLunch">#ffa045</color>
-    <color name="colorCardMealDinner">#4790ff</color>
+    <!-- BackgroundColors -->
+    <color name="colorBackgroundLogIn">#FFFEFE</color>
+
+    <!-- TextView -->
+    <color name="colorTextViewStandard">#151515</color>
+    <color name="colorTextViewAccent">#E7007E</color>
+    <color name="colorTextViewLight">#FFFFFF</color>
+
+    <!-- Buttons -->
+    <color name="customButton">#4D4CEB</color>
+    <color name="textColorCustomButton">#FFFFFF</color>
+    <color name="colorAddButton">#E7007E</color>
+
+    <!-- Cards -->
+    <color name="colorCardMeal">#5A27B0</color>
 </resources>
