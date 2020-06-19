@@ -22,4 +22,15 @@ public class DBContract {
             FOODS_ID, FOODS_NAME, FOODS_CONSUMATIONDATE, FOODS_CATEGORY, FOODS_SUBCATEGORY, FOODS_USER
         };
     }
+
+    static abstract class UserCalendars implements BaseColumns {
+        static final String USERCALENDARS_TABLE = "usercalendars";
+
+        static final String USERCALENDARS_UID = "uid";
+        static final String USERCALENDARS_CALENDARID = "calendarId";
+
+        static final String[] USERCALENDARS_COLUMNS = {
+                USERCALENDARS_UID, USERCALENDARS_CALENDARID
+        };
+    }
 }

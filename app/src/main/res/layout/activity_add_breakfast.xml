@@ -16,78 +16,8 @@
             android:id="@+id/custom_toolbar"
             layout="@layout/toolbar" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="20dp"
-            android:padding="5dp">
+        <include
+            layout="@layout/layout_common_setmeal"/>
 
-
-            <EditText
-                android:id="@+id/breakfast_insert_food"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:layout_marginRight="15dp"
-                android:ems="10"
-                android:inputType="textPersonName"
-                android:fontFamily="@font/montserrat"
-                android:hint="@string/insert_item_breakfast" />
-
-            <Button
-                android:id="@+id/add_item_breakfast"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:background="@drawable/custom_button"
-                android:backgroundTint="@color/colorAddButton"
-                android:fontFamily="@font/quicksand_bold"
-                android:text="@string/button_add_item_meal"
-                android:textAllCaps="false"
-                android:textColor="@color/textColorCustomButton"
-                android:textSize="18sp" />
-        </LinearLayout>
-
-        <ListView
-            android:id="@+id/breakfast_list_food_items"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:layout_marginHorizontal="20dp" />
-
-        <ImageView
-            android:id="@+id/preview_image_meal"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:maxHeight="260dp"
-            android:adjustViewBounds="true"
-            android:layout_marginHorizontal="20dp" />
-
-        <Button
-            android:id="@+id/take_picture_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="30dp"
-            android:background="@drawable/custom_button"
-            android:fontFamily="@font/quicksand_bold"
-            android:text="@string/button_take_picture"
-            android:textAllCaps="false"
-            android:textColor="@color/textColorCustomButton"
-            android:textSize="18sp" />
-
-        <Button
-            android:id="@+id/breakfast_finish_button"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="20dp"
-            android:layout_marginTop="20dp"
-            android:background="@drawable/custom_button"
-            android:fontFamily="@font/quicksand_bold"
-            android:text="@string/button_done"
-            android:textAllCaps="false"
-            android:textColor="@color/textColorCustomButton"
-            android:textSize="18sp" />
     </LinearLayout>
 </ScrollView>

@@ -2,6 +2,7 @@ package it.unindubria.pdm.weekplanning;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,6 +16,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -22,7 +24,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TimePicker;
 
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -30,26 +34,35 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 public class AddBreakfast extends AppCompatActivity implements View.OnClickListener {
     // CONSTANTS
     private static final int CAMERA = 10;
     private static final int READ_WRITE_FROM_STORAGE = 5;
     private static final int TAKE_PHOTO_CODE = 11;
+    private static final int REQUEST_CODE_GOOGLE_CALENDAR_PERMISSION = 222;
 
     // Firebase
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
     private String uid;
+    // Google Calendar API
+    private com.google.api.services.calendar.Calendar service;
+    private String weekPlanningCalendarId = "";
 
     // class' variables
     private ArrayList<Food> listFoodItems;
     private ArrayAdapter<Food> adapter;
     private ListView listView;
+    private String startTime = null;
+    private String endTime = null;
 
     // UI elements
     private EditText editTextFood;
     private Button addFoodItemButton;
+    private Button timePickerStartButton;
+    private Button timePickerEndButton;
     private Button takePicture;
     private Button saveButton;
     private ImageView previewImage;
@@ -75,16 +88,25 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
             uid = mFirebaseUser.getUid();
         }
 
+        service = GoogleCalendarHelper.getCalendarBuilderInstance(
+                AddBreakfast.this,
+                mFirebaseUser.getEmail()
+        );
+
         // connect elements to UI
-        editTextFood = findViewById(R.id.breakfast_insert_food);
-        addFoodItemButton = findViewById(R.id.add_item_breakfast);
+        editTextFood = findViewById(R.id.insert_food);
+        addFoodItemButton = findViewById(R.id.add_item_meal);
+        timePickerStartButton = findViewById(R.id.time_picker_start);
+        timePickerEndButton = findViewById(R.id.time_picker_end);
         takePicture = findViewById(R.id.take_picture_button);
-        saveButton = findViewById(R.id.breakfast_finish_button);
+        saveButton = findViewById(R.id.finish_button);
         previewImage = findViewById(R.id.preview_image_meal);
-        listView = findViewById(R.id.breakfast_list_food_items);
+        listView = findViewById(R.id.list_food_items_meal);
 
         // setting listeners
         addFoodItemButton.setOnClickListener(this);
+        timePickerStartButton.setOnClickListener(this);
+        timePickerEndButton.setOnClickListener(this);
         takePicture.setOnClickListener(this);
         saveButton.setOnClickListener(this);
         previewImage.setOnClickListener(this);
@@ -94,6 +116,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
         Intent mainActivityIntent = getIntent();
         // saving the date choosen by the user already formatted
         dateSelected = mainActivityIntent.getStringExtra("dateString");
+        weekPlanningCalendarId = mainActivityIntent.getStringExtra("calendarId");
 
         // open connection to local SQLite database
         localDB = DBAdapter.getInstance(AddBreakfast.this);
@@ -113,7 +136,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
     @Override
     public void onClick(View view) {
         switch(view.getId()) {
-            case R.id.add_item_breakfast:
+            case R.id.add_item_meal:
                 if(listFoodItems.size() < 10) {
                     addFoodItem();
                 } else {
@@ -127,26 +150,90 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
             case R.id.preview_image_meal:
                 handleAddMeals.deleteImage(uid, dateSelected, "breakfast", previewImage, AddBreakfast.this);
                 break;
+            case R.id.time_picker_start:
+                setTimeSelected(true);
+                break;
+            case R.id.time_picker_end:
+                setTimeSelected(false);
+                break;
             case R.id.take_picture_button:
                 takePictureFromCamera();
                 break;
-            case R.id.breakfast_finish_button:
+            case R.id.finish_button:
                 finishActivityAndGoBack();
         }
     }
 
+    private void insertMealGoogleCalendar() {
+        final String allFoodItemsString = helper.getStringListBreakfastItem(listFoodItems);
+
+        // TODO: YOU NEED TO TAKE TRAKE OF TIME_START AND TIME_END IN THE DB
+
+        if(startTime != null && endTime != null && helper.isThereAtLeastACharacter(allFoodItemsString))
+        new Thread(new Runnable() {
+            public void run() {
+                try {
+                    GoogleCalendarHelper.createNewEvent(
+                        service,
+                        weekPlanningCalendarId,
+                        getString(R.string.section_meal_breakfast),
+                        allFoodItemsString,
+                        "2020-06-19",
+                        startTime + ":00",
+                        endTime + ":00"
+                    );
+                } catch(UserRecoverableAuthIOException exc) {
+                    AddBreakfast.this.startActivityForResult(
+                            exc.getIntent(),
+                            AddBreakfast.REQUEST_CODE_GOOGLE_CALENDAR_PERMISSION
+                    );
+                } catch (IOException exc) {
+                    Log.e("CALENDAR INFO", "ERROR CALENDAR READING ID", exc);
+                }
+            }
+        }).start();
+    }
+
+    private void setTimeSelected(final boolean isStartTime) {
+        int initialHours, initialMinutes;
+
+        Calendar calendarUtil = Calendar.getInstance();
+
+        initialHours = calendarUtil.get(Calendar.HOUR_OF_DAY);
+        initialMinutes = calendarUtil.get(Calendar.MINUTE);
+
+        TimePickerDialog timePickerDialog = new TimePickerDialog(AddBreakfast.this, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                String timeSelected = (hourOfDay < 10 ? "0" : "") + hourOfDay + ":" + (minute < 10 ? "0" : "") + minute;
+                if(isStartTime) {
+                    startTime = timeSelected;
+                    timePickerStartButton.setText(startTime);
+                } else {
+                    endTime = timeSelected;
+                    timePickerEndButton.setText(endTime);
+                }
+            }
+        }, initialHours, initialMinutes, true);
+
+        timePickerDialog.show();
+    }
+
     private void addFoodItem() {
         String nameFoodItem = editTextFood.getText().toString();
-        Food food = new Food(nameFoodItem, dateSelected, "breakfast", uid);
 
-        listFoodItems.add(0, food);
-        adapter.notifyDataSetChanged();
+        if(!nameFoodItem.isEmpty() && helper.isThereAtLeastACharacter(nameFoodItem)) {
+            Food food = new Food(nameFoodItem, dateSelected, "breakfast", uid);
 
-        saveInfoToDB(food);
+            listFoodItems.add(0, food);
+            adapter.notifyDataSetChanged();
 
-        // The user could add more items at the time.
-        // Clearing the focus and hiding the keyboard would be bad UX.
-        editTextFood.setText("");
+            saveInfoToDB(food);
+
+            editTextFood.setText("");
+        } else {
+            helper.displayWithToast(AddBreakfast.this, R.string.insert_empty_item);
+        }
     }
 
     private void takePictureFromCamera() {
@@ -202,6 +289,8 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
 
         if (requestCode == TAKE_PHOTO_CODE && resultCode == RESULT_OK) {
             handleAddMeals.setPreviewImage(uid, dateSelected, "breakfast", previewImage, AddBreakfast.this, AddBreakfast.this);
+        } else if(requestCode == REQUEST_CODE_GOOGLE_CALENDAR_PERMISSION && resultCode == RESULT_OK) {
+            insertMealGoogleCalendar();
         }
     }
 
@@ -231,6 +320,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
     }
 
     private void finishActivityAndGoBack() {
+        insertMealGoogleCalendar();
         setResult(Activity.RESULT_OK, new Intent());
         finish();
     }

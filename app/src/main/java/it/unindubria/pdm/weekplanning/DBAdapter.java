@@ -47,6 +47,20 @@ public class DBAdapter {
         return idFoodItem;
     }
 
+    public long insertNewUserCalendar(String uid, String calendarId) {
+        ContentValues contentValues = new ContentValues();
+
+        contentValues.put(DBContract.UserCalendars.USERCALENDARS_UID, uid);
+        contentValues.put(DBContract.UserCalendars.USERCALENDARS_CALENDARID, calendarId);
+
+        long idRecordUserCalendar = db.insert(
+                DBContract.UserCalendars.USERCALENDARS_TABLE,
+                null,
+                contentValues);
+
+        return idRecordUserCalendar;
+    }
+
     public String debugAllRecordsFoodTable() {
         Cursor cursor = db.query(
                 DBContract.FoodItems.FOODS_TABLE,
@@ -132,6 +146,23 @@ public class DBAdapter {
         }
 
         return listFoodItemsSection;
+    }
+
+    public String getCalendarId(String uid) {
+        Cursor cursor = db.query(
+                DBContract.UserCalendars.USERCALENDARS_TABLE,
+                DBContract.UserCalendars.USERCALENDARS_COLUMNS,
+                DBContract.UserCalendars.USERCALENDARS_UID + " = ?",
+                new String[] { uid },
+                null, null, null, null
+        );
+
+        if(cursor == null || cursor.getCount() == 0) {
+            return null;
+        } else {
+            cursor.moveToFirst();
+            return cursor.getString(1);
+        }
     }
 
     public void removeFoodItem(long idItem) {

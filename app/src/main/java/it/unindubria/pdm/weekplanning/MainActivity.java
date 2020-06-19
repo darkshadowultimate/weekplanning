@@ -1,8 +1,10 @@
 package it.unindubria.pdm.weekplanning;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -18,28 +20,19 @@ import android.widget.TextView;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
-import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
-import com.google.api.client.util.DateTime;
 import com.google.api.services.calendar.Calendar;
-import com.google.api.services.calendar.model.Event;
-import com.google.api.services.calendar.model.EventAttendee;
-import com.google.api.services.calendar.model.EventDateTime;
-import com.google.api.services.calendar.model.EventReminder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     // CONSTANTS
     private static final int ADD_ITEMS_BREAKFAST = 1;
     private static final int ADD_ITEMS_LUNCH_DINNER = 2;
-    private static final int REQUEST_CODE_NEED_PERMISSION = 222;
     private final String[] SUBCATEGORIES_VOICES_DB = { "before", "first", "second", "after" };
 
     // Firebase
@@ -48,6 +41,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     private String uid;
     // Google Calendar API
     private Calendar service;
+    private String weekPlanningCalendarId = "";
 
     // class' variables
     private String selectedDateString;
@@ -98,19 +92,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setSupportActionBar(toolbar);
 
         service = GoogleCalendarHelper.getCalendarBuilderInstance(
-                    MainActivity.this,
-                    mFirebaseUser.getEmail()
-                );
-
-        /*
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    boolean result = GoogleCalendarHelper.createNewCalendar(service);
-                    Log.d("CREATE_NEW_CALENDAR", String.valueOf(result));
-                }
-            });
-        */
+                MainActivity.this,
+                mFirebaseUser.getEmail()
+        );
 
         // open connection to local SQLite database
         localDB = DBAdapter.getInstance(MainActivity.this);
@@ -140,24 +124,38 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         updateUI();
     }
 
-    private void insertMealGoogleCalendar(
-            final String summary,
-            final String description,
-            final String date,
-            final String timeStart,
-            final String timeEnd
-    ) {
+    private void createNewGoogleCalendar() {
+        String calendarId = GoogleCalendarHelper.createNewCalendar(
+            service,
+            uid,
+            getString(R.string.google_calendar_description)
+        );
+        if(calendarId != null) {
+            localDB.insertNewUserCalendar(uid, calendarId);
+            weekPlanningCalendarId = calendarId;
+        }
+        Log.d("CREATE_NEW_CALENDAR", String.valueOf(calendarId));
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
         new Thread(new Runnable() {
+            @Override
             public void run() {
                 try {
-                    GoogleCalendarHelper.createNewEvent(service, summary, description, date, timeStart, timeEnd);
-                } catch(UserRecoverableAuthIOException exc) {
-                    MainActivity.this.startActivityForResult(
-                        exc.getIntent(),
-                        MainActivity.REQUEST_CODE_NEED_PERMISSION
-                    );
-                } catch (IOException exc) {
-                    Log.e("CALENDAR INFO", "ERROR CALENDAR READING ID", exc);
+                    String calendarId = localDB.getCalendarId(uid);
+                    // check if the calendar exists
+                    if(calendarId == null) {
+                        createNewGoogleCalendar();
+                    } else {
+                        com.google.api.services.calendar.model.Calendar cal = service.calendars().get(calendarId).execute();
+                        weekPlanningCalendarId = calendarId;
+                    }
+                } catch(IOException exc) {
+                    Log.e("EXCEPTION RETRIEVE CALENDAR", "CALENDAR NOT FOUND");
+                    createNewGoogleCalendar();
                 }
             }
         }).start();
@@ -172,16 +170,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void updateBreakfast(ArrayList<Food> foodItems) {
-        String allItems = "";
+        String allItemsString = helper.getStringListBreakfastItem(foodItems);
 
-        for(Food item: foodItems) {
-            if(item.getCategory().equals("breakfast")) {
-                allItems += "- " + item.getName() + "\n";
-            }
-        }
-        foodItemBreakfast.setText(allItems);
+        foodItemBreakfast.setText(allItemsString);
 
-        if(!allItems.isEmpty()) {
+        if(!allItemsString.isEmpty()) {
             breakfastCard.setVisibility(View.VISIBLE);
             buttonAddBreakfast.setVisibility(View.GONE);
         } else {
@@ -245,6 +238,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             case R.id.mainactivity_add_breakfast_button:
                 Intent breakfastIntent = new Intent(MainActivity.this, AddBreakfast.class);
                 breakfastIntent.putExtra("dateString", selectedDateString);
+                breakfastIntent.putExtra("calendarId", weekPlanningCalendarId);
                 startActivityForResult(breakfastIntent, ADD_ITEMS_BREAKFAST);
                 break;
             case R.id.single_card_lunch:
@@ -283,7 +277,18 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public boolean onOptionsItemSelected(MenuItem item) {
         switch(item.getItemId()) {
             case R.id.logout:
-                logout();
+                new AlertDialog
+                    .Builder(MainActivity.this)
+                    .setTitle(getString(R.string.warning_logout_title))
+                    .setMessage(getString(R.string.warning_logout_message))
+                    .setPositiveButton(getString(R.string.button_yes), new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            logout();
+                        }
+                    })
+                    .setNegativeButton(getString(R.string.button_no), null)
+                    .show();
                 break;
             default:
                 return super.onOptionsItemSelected(item);
@@ -304,8 +309,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void logout() {
-        helper.displayWithToast(this, R.string.logout);
-
         FirebaseAuth.getInstance().signOut();
 
         GoogleSignInClient googleClient = GoogleAPIHelper.getGoogleSignInClient(getString(R.string.default_web_client_id), MainActivity.this);
@@ -317,7 +320,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
-                    startActivity(helper.changeActivity(MainActivity.this, LogIn.class));
+                        startActivity(helper.changeActivity(MainActivity.this, LogIn.class));
                     }
                 }
             );

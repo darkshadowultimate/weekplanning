@@ -28,14 +28,21 @@ public class DBHelper extends SQLiteOpenHelper {
         DBContract.FoodItems.FOODS_SUBCATEGORY + " TEXT, " +
         DBContract.FoodItems.FOODS_USER + " TEXT )";
 
+    private String CREATE_USERCALENDARS_TABLE =
+        "CREATE TABLE " + DBContract.UserCalendars.USERCALENDARS_TABLE + " (" +
+            DBContract.UserCalendars.USERCALENDARS_UID + " TEXT PRIMARY KEY, " +
+            DBContract.UserCalendars.USERCALENDARS_CALENDARID + " TEXT ) ";
+
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(CREATE_FOODS_TABLE);
+        db.execSQL(CREATE_USERCALENDARS_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
         db.execSQL("DROP TABLE IF EXISTS " + DBContract.FoodItems.FOODS_TABLE);
+        db.execSQL("DROP TABLE IF EXISTS " + DBContract.UserCalendars.USERCALENDARS_TABLE);
 
         this.onCreate(db);
     }

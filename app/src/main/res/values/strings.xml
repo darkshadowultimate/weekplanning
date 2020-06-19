@@ -9,6 +9,7 @@
     <string name="login_error_fields">All fields must be filled!</string>
     <string name="login_error_auth">Couldn\'t login into the account</string>
     <string name="signup_error_auth">Couldn\'t create the account</string>
+    <string name="insert_empty_item">The field cannot be empty!</string>
     <string name="ok">OK</string>
 
     <!-- Success messages -->
@@ -19,13 +20,27 @@
         In order to do so, we need you to sign in with your Google account
     </string>
 
+    <!-- Warning messages -->
+    <string name="warning_logout_title">Sign out</string>
+    <string name="warning_logout_message">Do you really wanna sign out?</string>
+
     <!-- Buttons -->
     <string name="button_add_breakfast">Add breakfast</string>
     <string name="button_add_lunch">Add lunch</string>
     <string name="button_add_dinner">Add dinner</string>
     <string name="button_add_item_meal">Add</string>
+    <string name="button_time_picker_start">Time start</string>
+    <string name="button_time_picker_end">Time end</string>
     <string name="button_take_picture">Take picture</string>
     <string name="button_done">Done</string>
+    <string name="button_yes">Yes</string>
+    <string name="button_no">No</string>
+
+    <!-- Google Calendar API -->
+    <string name="google_calendar_description">
+        Google Calendar created by WeekPlanning app
+        to store info about the meals that the user's gonna eat.
+    </string>
 
     <!-- Meals sections -->
     <string name="section_meal_breakfast">Breakfast</string>

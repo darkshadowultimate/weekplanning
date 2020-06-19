@@ -44,26 +44,27 @@ public class GoogleCalendarHelper {
         return service;
     }
 
-    public static boolean createNewCalendar(Calendar service) {
+    public static String createNewCalendar(Calendar service, String uid, String description) {
         com.google.api.services.calendar.model.Calendar calendar = new com.google.api.services.calendar.model.Calendar();
         calendar.setSummary("WeekPlanningCalendar");
         calendar.setTimeZone("Europe/Rome");
+        calendar.setDescription(description);
 
         try {
-            service.calendars().insert(calendar).execute();
-            return true;
+            return service.calendars().insert(calendar).execute().getId();
         } catch(IOException exc) {
-            return false;
+            return null;
         }
     }
 
     public static void createNewEvent(
             Calendar service,
+            String calendarId,
             String summary,
             String description,
-            String date,
-            String timeStart,
-            String timeEnd
+            String date,    // yyyy-mm-gg
+            String timeStart,   // hh:mm:ss
+            String timeEnd  // hh:mm:ss
     ) throws IOException {
         Event event = new Event()
                 .setSummary(summary)
@@ -91,7 +92,6 @@ public class GoogleCalendarHelper {
                 .setOverrides(Arrays.asList(reminderOverrides));
         event.setReminders(reminders);
 
-        String calendarId = "primary";
         event = service.events().insert(calendarId, event).execute();
     }
 }

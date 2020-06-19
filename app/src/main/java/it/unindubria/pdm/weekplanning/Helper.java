@@ -14,6 +14,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Locale;
 
 public class Helper extends AppCompatActivity {
@@ -25,6 +26,26 @@ public class Helper extends AppCompatActivity {
         intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK);
 
         return intent;
+    }
+
+    public boolean isThereAtLeastACharacter(String stringToCheck) {
+        for(int i = 0; i < stringToCheck.length(); i++) {
+            if(Character.isLetter(stringToCheck.charAt(i)))
+                return true;
+        }
+        return false;
+    }
+
+    public String getStringListBreakfastItem(ArrayList<Food> foodItems) {
+        String allItems = "";
+
+        for(Food item: foodItems) {
+            if(item.getCategory().equals("breakfast")) {
+                allItems += "- " + item.getName() + "\n";
+            }
+        }
+
+        return allItems;
     }
 
     public void createDirectoryStructure(String uid, String date, String category) {
