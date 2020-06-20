@@ -61,6 +61,24 @@ public class DBAdapter {
         return idRecordUserCalendar;
     }
 
+    public void insertGoogleCalendarEvent(GoogleCalendarEvent googleCalendarEvent) {
+        long idFoodItem = db.insert(
+            DBContract.CalendarEvents.CALENDAREVENTS_TABLE,
+            null,
+            googleCalendarEvent.getAsContentValue()
+        );
+    }
+
+    public void updateGoogleCalendarEvent(GoogleCalendarEvent googleCalendarEvent) {
+        db.update(
+            DBContract.CalendarEvents.CALENDAREVENTS_TABLE,
+            googleCalendarEvent.getAsContentValue(),
+            DBContract.CalendarEvents.CALENDAREVENTS_DATE + " = ? AND " +
+            DBContract.CalendarEvents.CALENDAREVENTS_CATEGORY_MEAL + " = ?",
+            new String[] { googleCalendarEvent.getDateEvent(), googleCalendarEvent.getCategoryMeal() }
+        );
+    }
+
     public String debugAllRecordsFoodTable() {
         Cursor cursor = db.query(
                 DBContract.FoodItems.FOODS_TABLE,
@@ -165,11 +183,48 @@ public class DBAdapter {
         }
     }
 
+    public GoogleCalendarEvent getGoogleCalendarEvent(String dateEvent, String category) {
+        Cursor cursor = db.query(
+                DBContract.CalendarEvents.CALENDAREVENTS_TABLE,
+                DBContract.CalendarEvents.CALENDAREVENTS_COLUMNS,
+                DBContract.CalendarEvents.CALENDAREVENTS_DATE + " = ? AND " +
+                DBContract.CalendarEvents.CALENDAREVENTS_CATEGORY_MEAL + " = ?",
+                new String[] { dateEvent, category },
+                null, null, null, null
+        );
+
+        if(cursor == null || cursor.getCount() == 0) {
+            return null;
+        } else {
+            cursor.moveToFirst();
+
+            String id = cursor.getString(0);
+            String timeStart = cursor.getString(1);
+            String timeEnd = cursor.getString(2);
+            String description = cursor.getString(3);
+            String date = cursor.getString(4);
+            String categoryMeal = cursor.getString(5);
+
+
+
+            return new GoogleCalendarEvent(id, timeStart, timeEnd, description, date, categoryMeal);
+        }
+    }
+
     public void removeFoodItem(long idItem) {
         db.delete(
             DBContract.FoodItems.FOODS_TABLE,
             DBContract.FoodItems.FOODS_ID + " = ?",
             new String[] { String.valueOf(idItem) }
+        );
+    }
+
+    public void removeGoogleCalendarEvent(String dateEvent, String category) {
+        db.delete(
+            DBContract.CalendarEvents.CALENDAREVENTS_TABLE,
+            DBContract.CalendarEvents.CALENDAREVENTS_DATE + " = ? AND " +
+            DBContract.CalendarEvents.CALENDAREVENTS_CATEGORY_MEAL + " = ?",
+            new String[] { dateEvent, category }
         );
     }
 }

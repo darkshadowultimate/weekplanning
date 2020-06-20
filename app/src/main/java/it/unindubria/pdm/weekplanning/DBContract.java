@@ -33,4 +33,24 @@ public class DBContract {
                 USERCALENDARS_UID, USERCALENDARS_CALENDARID
         };
     }
+
+    static abstract class CalendarEvents implements BaseColumns {
+        static final String CALENDAREVENTS_TABLE = "calendarEvents";
+
+        static final String CALENDAREVENTS_ID = "id";
+        static final String CALENDAREVENTS_TIMESTART = "timeStart";
+        static final String CALENDAREVENTS_TIMEEND = "timeEnd";
+        static final String CALENDAREVENTS_DESCRIPTION = "description";
+        static final String CALENDAREVENTS_DATE = "dateEvent";
+        static final String CALENDAREVENTS_CATEGORY_MEAL = "categoryMeal";
+
+        static final String[] CALENDAREVENTS_COLUMNS = {
+                CALENDAREVENTS_ID,
+                CALENDAREVENTS_TIMESTART,
+                CALENDAREVENTS_TIMEEND,
+                CALENDAREVENTS_DESCRIPTION,
+                CALENDAREVENTS_DATE,
+                CALENDAREVENTS_CATEGORY_MEAL
+        };
+    }
 }

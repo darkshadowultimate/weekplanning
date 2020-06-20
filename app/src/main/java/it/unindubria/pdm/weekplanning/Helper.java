@@ -48,6 +48,57 @@ public class Helper extends AppCompatActivity {
         return allItems;
     }
 
+    public String getStringListBreakfastItemForDB(ArrayList<Food> foodItems) {
+        String allItems = "";
+
+        for(Food item: foodItems) {
+            if(item.getCategory().equals("breakfast")) {
+                allItems += item.getName() + "//";
+            }
+        }
+
+        return allItems;
+    }
+
+    public ArrayList<String> convertListBreakfastItemsDBToArrayList(String items) {
+        ArrayList<String> arrayListItems = new ArrayList<String>();
+        String[] arrayItems = items.split("//");
+
+        for(String item: arrayItems) {
+            arrayListItems.add(item);
+        }
+
+        return arrayListItems;
+    }
+
+    public boolean areListItemsDifferent(ArrayList<String> listItemsString, ArrayList<Food> listItemsFood) {
+        for(int i = 0; i < listItemsFood.size(); i++) {
+            if(listItemsFood.get(i).getName().equals(listItemsString.get(0))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public int getHoursFromString(String time) {
+        return Integer.parseInt(time.split(":")[0]);
+    }
+
+    public int getMinutesFromString(String time) {
+        return Integer.parseInt(time.split(":")[1]);
+    }
+
+    public boolean isEndTimeBiggerThanStartTime(String startTime, String endTime) {
+        if(getHoursFromString(endTime) > getHoursFromString(startTime)) {
+            return true;
+        } else if(getHoursFromString(endTime) == getHoursFromString(startTime)) {
+            if(getMinutesFromString(endTime) > getMinutesFromString(startTime)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     public void createDirectoryStructure(String uid, String date, String category) {
         String
             basePath = "/WeekPlanning",
@@ -79,9 +130,11 @@ public class Helper extends AppCompatActivity {
     }
 
     public String getStringDate(int day, int month, int year) {
-        LocalDate localDate = LocalDate.of(year, month, day);
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MMM-yyyy", Locale.ITALIAN);
-        return formatter.format(localDate);
+        return year + "-" + (month < 10 ? "0" : "") + month + "-" + (day < 10 ? "0" : "") + day;
+    }
+
+    public String getStringTime(int hours, int mins) {
+        return (hours < 10 ? "0" : "") + hours + ":" + (mins < 10 ? "0" : "") + mins + ":00";
     }
 
     public void displayWithDialog(Context context, int title, int message) {

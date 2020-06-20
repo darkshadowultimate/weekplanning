@@ -1,6 +1,9 @@
 <resources>
     <string name="app_name">WeekPlanning</string>
 
+    <!-- CONSTANTS -->
+    <string name="constant_breakfast">breakfast</string>
+
     <!-- Menu items -->
     <string name="logout">LOGOUT</string>
 
@@ -10,6 +13,12 @@
     <string name="login_error_auth">Couldn\'t login into the account</string>
     <string name="signup_error_auth">Couldn\'t create the account</string>
     <string name="insert_empty_item">The field cannot be empty!</string>
+    <string name="error_time_not_selected_title">Time not selected</string>
+    <string name="error_time_not_selected_message">You have to choose the time for your meal.</string>
+    <string name="error_timestart_less_than_timeend_title">Wrong time selected</string>
+    <string name="error_timestart_less_than_timeend_message">
+        The start time must be less than the end time
+    </string>
     <string name="ok">OK</string>
 
     <!-- Success messages -->
@@ -21,8 +30,17 @@
     </string>
 
     <!-- Warning messages -->
+    <string name="warning_permission_calendar_title">Permissions required</string>
+    <string name="warning_permission_calendar_message">
+        This app won\'t work without the permissions to access the user's Google Calendar.
+    </string>
     <string name="warning_logout_title">Sign out</string>
     <string name="warning_logout_message">Do you really wanna sign out?</string>
+    <string name="warning_remove_list_item_element">Do you really wanna remove this element?</string>
+    <string name="warning_remove_list_item_element_last">
+        If you remove this element, your meal will be removed, too.
+        \nDo you want to proceed?
+    </string>
 
     <!-- Buttons -->
     <string name="button_add_breakfast">Add breakfast</string>
@@ -33,6 +51,8 @@
     <string name="button_time_picker_end">Time end</string>
     <string name="button_take_picture">Take picture</string>
     <string name="button_done">Done</string>
+    <string name="button_negate">Negate</string>
+    <string name="button_allow">Allow</string>
     <string name="button_yes">Yes</string>
     <string name="button_no">No</string>
 

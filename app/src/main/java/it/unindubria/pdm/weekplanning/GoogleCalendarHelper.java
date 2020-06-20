@@ -4,6 +4,7 @@ import android.content.Context;
 
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.extensions.android.gms.auth.GoogleAccountCredential;
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
@@ -44,20 +45,28 @@ public class GoogleCalendarHelper {
         return service;
     }
 
-    public static String createNewCalendar(Calendar service, String uid, String description) {
+    public static String createNewCalendar(
+        Calendar service,
+        String uid,
+        String description
+    ) throws IOException {
         com.google.api.services.calendar.model.Calendar calendar = new com.google.api.services.calendar.model.Calendar();
         calendar.setSummary("WeekPlanningCalendar");
         calendar.setTimeZone("Europe/Rome");
         calendar.setDescription(description);
 
-        try {
-            return service.calendars().insert(calendar).execute().getId();
-        } catch(IOException exc) {
-            return null;
-        }
+        return service.calendars().insert(calendar).execute().getId();
     }
 
-    public static void createNewEvent(
+    private static EventDateTime convertToEventDateTime(String date, String time) {
+        DateTime startDateTime = new DateTime(date + "T" + time + "+02:00");
+
+        return new EventDateTime()
+                .setDateTime(startDateTime)
+                .setTimeZone("Europe/Rome");
+    }
+
+    public static String createNewEvent(
             Calendar service,
             String calendarId,
             String summary,
@@ -70,19 +79,9 @@ public class GoogleCalendarHelper {
                 .setSummary(summary)
                 .setDescription(description);
 
-        DateTime startDateTime = new DateTime(date + "T" + timeStart + "+02:00");
+        event.setStart(convertToEventDateTime(date, timeStart));
 
-        EventDateTime start = new EventDateTime()
-                .setDateTime(startDateTime)
-                .setTimeZone("Europe/Rome");
-        event.setStart(start);
-
-        DateTime endDateTime = new DateTime(date + "T" + timeEnd + "+02:00");
-
-        EventDateTime end = new EventDateTime()
-                .setDateTime(endDateTime)
-                .setTimeZone("Europe/Rome");
-        event.setEnd(end);
+        event.setEnd(convertToEventDateTime(date, timeEnd));
 
         EventReminder[] reminderOverrides = new EventReminder[] {
                 new EventReminder().setMethod("popup").setMinutes(30)
@@ -92,6 +91,32 @@ public class GoogleCalendarHelper {
                 .setOverrides(Arrays.asList(reminderOverrides));
         event.setReminders(reminders);
 
-        event = service.events().insert(calendarId, event).execute();
+        return service.events().insert(calendarId, event).execute().getId();
+    }
+
+    public static void updateCalendarEvent(
+        Calendar service,
+        String idCalendar,
+        String idGoogleCalendarEvent,
+        String date,
+        String timeStart,
+        String timeEnd,
+        String description
+    ) throws IOException {
+        Event event = service.events().get(idCalendar, idGoogleCalendarEvent).execute();
+
+        event.setStart(convertToEventDateTime(date, timeStart));
+        event.setEnd(convertToEventDateTime(date, timeEnd));
+        event.setDescription(description);
+
+        service.events().patch(idCalendar, event.getId(), event).execute();
+    }
+
+    public static void deleteCalendarEvent(
+        Calendar service,
+        String idCalendar,
+        String idEvent
+    ) throws IOException {
+        service.events().delete(idCalendar, idEvent).execute();
     }
 }
