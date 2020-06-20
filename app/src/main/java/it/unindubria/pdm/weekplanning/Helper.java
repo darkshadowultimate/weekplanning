@@ -8,14 +8,13 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.google.api.services.calendar.Calendar;
+
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Locale;
 
 public class Helper extends AppCompatActivity {
 
@@ -135,6 +134,70 @@ public class Helper extends AppCompatActivity {
 
     public String getStringTime(int hours, int mins) {
         return (hours < 10 ? "0" : "") + hours + ":" + (mins < 10 ? "0" : "") + mins + ":00";
+    }
+
+    public int getCameraPermissionCode(Context context) {
+        return Integer.parseInt(context.getString(R.string.constant_permission_code_camera));
+    }
+
+    public int getStoragePermissionCode(Context context) {
+        return Integer.parseInt(context.getString(R.string.constant_permission_code_readWriteStorage));
+    }
+
+    public int getBreakfastCodeStartActivity(Context context) {
+        return Integer.parseInt(context.getString(R.string.constant_start_activity_code_breakfast));
+    }
+
+    public int getLunchDinnerCodeStartActivity(Context context) {
+        return Integer.parseInt(context.getString(R.string.constant_start_activity_code_lunchDinner));
+    }
+
+    public int getGoogleCalendarCodeStartActivity(Context context) {
+        return Integer.parseInt(context.getString(R.string.constant_start_activity_code_googleCalPerm));
+    }
+
+    public int getTakePictureCodeStartActivity(Context context) {
+        return Integer.parseInt(context.getString(R.string.constant_start_activity_code_takePicture));
+    }
+
+    public static void addAllFoodItemsToDBWhichWereAdded(DBAdapter localDB, ArrayList<Food> itemsToAdd) {
+        for(Food foodItem: itemsToAdd) {
+            localDB.insert(foodItem);
+        }
+    }
+
+    public static void deleteAllFoodItemsFromDBWhichWereRemoved(DBAdapter localDB, ArrayList<Food> itemsToRemove) {
+        for(Food foodItem: itemsToRemove) {
+            localDB.removeFoodItem(foodItem.getId());
+        }
+    }
+
+    public static void deleteGoogleCalendarEvent(
+            final Calendar service,
+            final DBAdapter localDB,
+            final GoogleCalendarEvent googleCalendarEvent,
+            final String weekPlanningCalendarId,
+            final String idGoogleCalendarEvent,
+            final String dateSelected,
+            final String category
+    ) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                Log.e("DELETE EVENT", "INSIDE METHOD TO DELETE EVENT");
+                if(googleCalendarEvent != null) {
+                    Log.e("DELETE EVENT", "DELETE EVENT FROM LOCAL DB");
+                    localDB.removeGoogleCalendarEvent(dateSelected, category);
+
+                    try {
+                        Log.e("DELETE EVENT", "DELETE EVENT FROM GOOGLE CALENDAR API");
+                        GoogleCalendarHelper.deleteCalendarEvent(service, weekPlanningCalendarId, idGoogleCalendarEvent);
+                    } catch(Exception exc) {
+                        Log.e("CALENDAR EVENT DELETE", "THE EVENT DOESN'T EXISTS");
+                    }
+                }
+            }
+        }).start();
     }
 
     public void displayWithDialog(Context context, int title, int message) {

@@ -111,7 +111,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         Intent mainActivityIntent = getIntent();
         // saving the date choosen by the user already formatted
         dateSelected = mainActivityIntent.getStringExtra("dateString");
-        lunchOrDinner = mainActivityIntent.getStringExtra("lunchOrLunch");
+        lunchOrDinner = mainActivityIntent.getStringExtra("lunchOrDinner");
 
         // open connection to local SQLite database
         localDB = DBAdapter.getInstance(AddLunchDinner.this);
@@ -143,7 +143,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
                 }
                 break;
             case R.id.preview_image_meal:
-                handleAddMeals.deleteImage(uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this);
+                handleAddMeals.handleDeleteImage(true, uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this);
                 break;
             case R.id.take_picture_button:
                 takePictureFromCamera();

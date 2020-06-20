@@ -2,7 +2,22 @@
     <string name="app_name">WeekPlanning</string>
 
     <!-- CONSTANTS -->
-    <string name="constant_breakfast">breakfast</string>
+        <!-- Type of meals -->
+        <string name="constant_breakfast">breakfast</string>
+        <string name="constant_lunch">lunch</string>
+        <string name="constant_dinner">dinner</string>
+        <!-- Intent extra fields to breakfast/lunch/dinner -->
+        <string name="constant_intent_dateString">dateString</string>
+        <string name="constant_intent_calendarId">calendarId</string>
+        <string name="constant_intent_lunchOrDinner">lunchOrDinner</string>
+        <!-- Start new activity codes -->
+        <string name="constant_start_activity_code_breakfast">1</string>
+        <string name="constant_start_activity_code_lunchDinner">2</string>
+        <string name="constant_start_activity_code_googleCalPerm">222</string>
+        <string name="constant_start_activity_code_takePicture">11</string>
+        <!-- Permissions codes -->
+        <string name="constant_permission_code_camera">10</string>
+        <string name="constant_permission_code_readWriteStorage">5</string>
 
     <!-- Menu items -->
     <string name="logout">LOGOUT</string>
@@ -18,6 +33,9 @@
     <string name="error_timestart_less_than_timeend_title">Wrong time selected</string>
     <string name="error_timestart_less_than_timeend_message">
         The start time must be less than the end time
+    </string>
+    <string name="error_unable_retrieve_permissions">
+        Unable to retrieve permissions
     </string>
     <string name="ok">OK</string>
 

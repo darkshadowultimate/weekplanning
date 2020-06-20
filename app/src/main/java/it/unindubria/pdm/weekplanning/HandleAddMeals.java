@@ -166,29 +166,48 @@ public class HandleAddMeals {
         }
     }
 
-    public void deleteImage(final String uid, final String date, final String category, final ImageView previewImage, Context context)  {
+    private void deleteImage(File fileToDelete, String uid, String date, String category, ImageView previewImage) {
+        // delete image
+        deleteDirectoryOrFile(fileToDelete);
+        // delete parents empty directories
+        clearEmptyDirectories(uid, date, category);
+        // clear the data contained inside the ImageView UI element
+        // (to show the user that the image was deleted)
+        previewImage.setImageBitmap(null);
+        previewImage.setMaxHeight(0);
+    }
+
+    /*
+    *   This method handle the deletion of an image
+    *
+    *   @param  withAuthorization   Specify if the permission from the user is needed
+    *   @param  uid                 An unique identifier for the user
+    *   @param  date                A string representing the date when the meal will be consumed
+    *   @param  category            The category of the meal ("breakfast", "lunch", "dinner")
+    *   @param  previewImage        An object representing the image element on the UI
+    *   @param  context             The Context to access some methods
+    **/
+    public void handleDeleteImage(boolean withAuthorization, final String uid, final String date, final String category, final ImageView previewImage, Context context)  {
         final File fileToDelete = getImageFile(uid, date, category);
 
         if(fileToDelete.exists()) {
-            new AlertDialog
-                .Builder(context)
-                .setTitle("Remove element")
-                .setMessage("Do you really wanna remove this element?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // delete image
-                        deleteDirectoryOrFile(fileToDelete);
-                        // delete parents empty directories
-                        clearEmptyDirectories(uid, date, category);
-                        // clear the data contained inside the ImageView UI element
-                        // (to show the user that the image was deleted)
-                        previewImage.setImageBitmap(null);
-                        previewImage.setMaxHeight(0);
-                    }
-                })
-                .setNegativeButton("No", null)
-                .show();
+            if(withAuthorization) {
+                new AlertDialog
+                    .Builder(context)
+                    .setTitle("Remove element")
+                    .setMessage("Do you really wanna remove this element?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            deleteImage(fileToDelete, uid, date, category, previewImage);
+                        }
+                    })
+                    .setNegativeButton("No", null)
+                    .show();
+            } else {
+                // delete the image without the authorization from the user
+                deleteImage(fileToDelete, uid, date, category, previewImage);
+            }
         }
     }
 }

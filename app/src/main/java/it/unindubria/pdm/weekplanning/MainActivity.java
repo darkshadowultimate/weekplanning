@@ -32,9 +32,6 @@ import java.util.ArrayList;
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     // CONSTANTS
-    private static final int ADD_ITEMS_BREAKFAST = 1;
-    private static final int ADD_ITEMS_LUNCH_DINNER = 2;
-    private static final int REQUEST_CODE_GOOGLE_CALENDAR_PERMISSION = 222;
     private final String[] SUBCATEGORIES_VOICES_DB = { "before", "first", "second", "after" };
 
     // Firebase
@@ -141,28 +138,27 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         } catch(UserRecoverableAuthIOException exc) {
             startActivityForResult(
                 exc.getIntent(),
-                MainActivity.REQUEST_CODE_GOOGLE_CALENDAR_PERMISSION
+                helper.getGoogleCalendarCodeStartActivity(MainActivity.this)
             );
         } catch(IOException exc) {
             Log.e("CREATE_NEW_CALENDAR", "CANNOT CREATE CALENDAR", exc);
         }
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-
+    private void handleCreateNewGoogleCalendar() {
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
                     String calendarId = localDB.getCalendarId(uid);
+                    Log.e("CHECK IF CALENDAR ID EXISTS FROM LOCAL DB =======> ", calendarId == null ? "NULL" : calendarId);
                     // check if the calendar exists
                     if(calendarId == null) {
                         createNewGoogleCalendar();
                     } else {
                         com.google.api.services.calendar.model.Calendar cal = service.calendars().get(calendarId).execute();
                         weekPlanningCalendarId = calendarId;
+                        Log.e("GET EXISTING CALENDAR =======> ", weekPlanningCalendarId);
                     }
                 } catch(IOException exc) {
                     Log.e("EXCEPTION RETRIEVE CALENDAR", "CALENDAR NOT FOUND");
@@ -170,6 +166,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 }
             }
         }).start();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        handleCreateNewGoogleCalendar();
     }
 
     private void updateUI() {
@@ -242,29 +245,45 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
     }
 
+    private void startActivityForResultMeal(String typeOfMeal) {
+        if(typeOfMeal.equals(getString(R.string.constant_breakfast))) {
+            Intent breakfastIntent = new Intent(MainActivity.this, AddBreakfast.class);
+            breakfastIntent.putExtra(
+                getString(R.string.constant_intent_dateString),
+                selectedDateString
+            );
+            breakfastIntent.putExtra(
+                getString(R.string.constant_intent_calendarId),
+                weekPlanningCalendarId);
+            startActivityForResult(breakfastIntent, helper.getBreakfastCodeStartActivity(MainActivity.this));
+        } else {
+            Intent lunchIntent = new Intent(MainActivity.this, AddLunchDinner.class);
+            lunchIntent.putExtra(
+                    getString(R.string.constant_intent_dateString),
+                    selectedDateString
+            );
+            lunchIntent.putExtra(
+                getString(R.string.constant_intent_lunchOrDinner),
+                typeOfMeal.equals(getString(R.string.constant_lunch))
+            );
+            startActivityForResult(lunchIntent, helper.getLunchDinnerCodeStartActivity(MainActivity.this));
+        }
+    }
+
     @Override
     public void onClick(View view) {
         switch(view.getId()) {
             case R.id.single_card_breakfast:
             case R.id.mainactivity_add_breakfast_button:
-                Intent breakfastIntent = new Intent(MainActivity.this, AddBreakfast.class);
-                breakfastIntent.putExtra("dateString", selectedDateString);
-                breakfastIntent.putExtra("calendarId", weekPlanningCalendarId);
-                startActivityForResult(breakfastIntent, ADD_ITEMS_BREAKFAST);
+                startActivityForResultMeal(getString(R.string.constant_breakfast));
                 break;
             case R.id.single_card_lunch:
             case R.id.mainactivity_add_lunch_button:
-                Intent lunchIntent = new Intent(MainActivity.this, AddLunchDinner.class);
-                lunchIntent.putExtra("dateString", selectedDateString);
-                lunchIntent.putExtra("lunchOrLunch", "lunch");
-                startActivityForResult(lunchIntent, ADD_ITEMS_LUNCH_DINNER);
+                startActivityForResultMeal(getString(R.string.constant_lunch));
                 break;
             case R.id.single_card_dinner:
             case R.id.mainactivity_add_dinner_button:
-                Intent dinnerIntent = new Intent(MainActivity.this, AddLunchDinner.class);
-                dinnerIntent.putExtra("dateString", selectedDateString);
-                dinnerIntent.putExtra("lunchOrLunch", "dinner");
-                startActivityForResult(dinnerIntent, ADD_ITEMS_LUNCH_DINNER);
+                startActivityForResultMeal(getString(R.string.constant_dinner));
                 break;
         }
     }
@@ -297,13 +316,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             .setPositiveButton(getString(R.string.button_allow), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    createNewGoogleCalendar();
+                    handleCreateNewGoogleCalendar();
                 }
             })
             .setNegativeButton(getString(R.string.button_negate), new DialogInterface.OnClickListener() {
                 @Override
                 public void onClick(DialogInterface dialog, int which) {
-                    requireGoogleCalendarPermissions();
+                    helper.displayWithToast(
+                    MainActivity.this,
+                        getString(R.string.error_unable_retrieve_permissions)
+                    );
+                    finish();
                 }
             })
             .show();
@@ -336,14 +359,17 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == ADD_ITEMS_BREAKFAST || requestCode == ADD_ITEMS_LUNCH_DINNER) {
+        if (
+            requestCode == helper.getBreakfastCodeStartActivity(MainActivity.this) ||
+            requestCode == helper.getLunchDinnerCodeStartActivity(MainActivity.this)
+        ) {
             if(resultCode == Activity.RESULT_OK) {
                 updateUI();
             }
             if (resultCode == Activity.RESULT_CANCELED) {}
-        } else if(requestCode == REQUEST_CODE_GOOGLE_CALENDAR_PERMISSION) {
-            if(requestCode == Activity.RESULT_OK) {
-                createNewGoogleCalendar();
+        } else if(requestCode == helper.getGoogleCalendarCodeStartActivity(MainActivity.this)) {
+            if(resultCode == RESULT_OK) {
+                handleCreateNewGoogleCalendar();
             } else {
                 requireGoogleCalendarPermissions();
             }

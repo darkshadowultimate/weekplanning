@@ -4,6 +4,7 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.SQLException;
+import android.database.sqlite.SQLiteConstraintException;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
 
@@ -167,19 +168,24 @@ public class DBAdapter {
     }
 
     public String getCalendarId(String uid) {
-        Cursor cursor = db.query(
-                DBContract.UserCalendars.USERCALENDARS_TABLE,
-                DBContract.UserCalendars.USERCALENDARS_COLUMNS,
-                DBContract.UserCalendars.USERCALENDARS_UID + " = ?",
-                new String[] { uid },
-                null, null, null, null
-        );
+        try {
+            Cursor cursor = db.query(
+                    DBContract.UserCalendars.USERCALENDARS_TABLE,
+                    DBContract.UserCalendars.USERCALENDARS_COLUMNS,
+                    DBContract.UserCalendars.USERCALENDARS_UID + " = ?",
+                    new String[] { uid },
+                    null, null, null, null
+            );
 
-        if(cursor == null || cursor.getCount() == 0) {
+            if(cursor == null || cursor.getCount() == 0) {
+                return null;
+            } else {
+                cursor.moveToFirst();
+                return cursor.getString(1);
+            }
+        } catch(SQLiteConstraintException exc) {
+            Log.e("ERROR SQLiteConstraintException", "CANNOT GET ID CALENDAR", exc);
             return null;
-        } else {
-            cursor.moveToFirst();
-            return cursor.getString(1);
         }
     }
 
@@ -225,6 +231,14 @@ public class DBAdapter {
             DBContract.CalendarEvents.CALENDAREVENTS_DATE + " = ? AND " +
             DBContract.CalendarEvents.CALENDAREVENTS_CATEGORY_MEAL + " = ?",
             new String[] { dateEvent, category }
+        );
+    }
+
+    private void removeLastCalendarRecord(String uid) {
+        db.delete(
+            DBContract.UserCalendars.USERCALENDARS_TABLE,
+            DBContract.UserCalendars.USERCALENDARS_UID + " = ?",
+            new String[] { uid }
         );
     }
 }
