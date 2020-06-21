@@ -248,37 +248,13 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setTimeSelected(final boolean isStartTime) {
-        int initialHours, initialMinutes;
-
-        if(timeEvent.isTimeEventDefined()) {
-            if(isStartTime) {
-                initialHours = timeEvent.getHoursTimeStart();
-                initialMinutes = timeEvent.getMinutesTimeStart();
-            } else {
-                initialHours = timeEvent.getHoursTimeEnd();
-                initialMinutes = timeEvent.getMinutesTimeEnd();
-            }
-        } else {
-            Calendar calendarUtil = Calendar.getInstance();
-
-            initialHours = calendarUtil.get(Calendar.HOUR_OF_DAY);
-            initialMinutes = calendarUtil.get(Calendar.MINUTE);
-        }
-
-        TimePickerDialog timePickerDialog = new TimePickerDialog(AddBreakfast.this, new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                if(isStartTime) {
-                    timeEvent.setTimeStart(hourOfDay, minute);
-                    timePickerStartButton.setText(timeEvent.getTimeStart());
-                } else {
-                    timeEvent.setTimeEnd(hourOfDay, minute);
-                    timePickerEndButton.setText(timeEvent.getTimeEnd());
-                }
-            }
-        }, initialHours, initialMinutes, true);
-
-        timePickerDialog.show();
+        helper.setTimeWithTimePicker(
+                AddBreakfast.this,
+                timeEvent,
+                timePickerStartButton,
+                timePickerEndButton,
+                isStartTime
+        );
     }
 
     private void addFoodItem() {
