@@ -1,12 +1,17 @@
 package it.unindubria.pdm.weekplanning;
 
+import android.app.TimePickerDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.api.services.calendar.Calendar;
@@ -103,24 +108,47 @@ public class Helper extends AppCompatActivity {
         return false;
     }
 
-    public int getHoursFromString(String time) {
-        return Integer.parseInt(time.split(":")[0]);
-    }
 
-    public int getMinutesFromString(String time) {
-        return Integer.parseInt(time.split(":")[1]);
-    }
+    public void setTimeWithTimePicker(
+            Context context,
+            final TimeEvent timeEvent,
+            final Button timePickerStartButton,
+            final Button timePickerEndButton,
+            final boolean isStartTime
+    ) {
+        int initialHours, initialMinutes;
 
-    public boolean isEndTimeBiggerThanStartTime(String startTime, String endTime) {
-        if(getHoursFromString(endTime) > getHoursFromString(startTime)) {
-            return true;
-        } else if(getHoursFromString(endTime) == getHoursFromString(startTime)) {
-            if(getMinutesFromString(endTime) > getMinutesFromString(startTime)) {
-                return true;
+        if(timeEvent.isStartTimeDefined() && timeEvent.isEndTimeDefined()) {
+            if(isStartTime) {
+                initialHours = timeEvent.getHoursTimeStart();
+                initialMinutes = timeEvent.getMinutesTimeStart();
+            } else {
+                initialHours = timeEvent.getHoursTimeEnd();
+                initialMinutes = timeEvent.getMinutesTimeEnd();
             }
+        } else {
+            java.util.Calendar calendarUtil = java.util.Calendar.getInstance();
+
+            initialHours = calendarUtil.get(java.util.Calendar.HOUR_OF_DAY);
+            initialMinutes = calendarUtil.get(java.util.Calendar.MINUTE);
         }
-        return false;
+
+        TimePickerDialog timePickerDialog = new TimePickerDialog(context, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                if(isStartTime) {
+                    timeEvent.setTimeStart(hourOfDay, minute);
+                    timePickerStartButton.setText(timeEvent.getTimeStart());
+                } else {
+                    timeEvent.setTimeEnd(hourOfDay, minute);
+                    timePickerEndButton.setText(timeEvent.getTimeEnd());
+                }
+            }
+        }, initialHours, initialMinutes, true);
+
+        timePickerDialog.show();
     }
+
 
     public void createDirectoryStructure(String uid, String date, String category) {
         String
@@ -156,10 +184,6 @@ public class Helper extends AppCompatActivity {
         return year + "-" + (month < 10 ? "0" : "") + month + "-" + (day < 10 ? "0" : "") + day;
     }
 
-    public String getStringTime(int hours, int mins) {
-        return (hours < 10 ? "0" : "") + hours + ":" + (mins < 10 ? "0" : "") + mins + ":00";
-    }
-
     public int getCameraPermissionCode(Context context) {
         return Integer.parseInt(context.getString(R.string.constant_permission_code_camera));
     }
@@ -188,6 +212,41 @@ public class Helper extends AppCompatActivity {
         for(Food foodItem: itemsToAdd) {
             localDB.insert(foodItem);
         }
+    }
+
+    public static void handleRemoveListViewItem(
+            Context context,
+            final ArrayList<Food> generalArrayList,
+            final ArrayList<Food> newItemsArrayList,
+            final ArrayList<Food> itemsToDeleteArrayList,
+            final ArrayAdapter<Food> adapter,
+            final int indexItemToRemove
+    ) {
+        new AlertDialog
+            .Builder(context)
+            .setTitle(context.getString(R.string.warning_remove_list_item_element_title))
+            .setMessage(
+                    generalArrayList.size() == 1
+                            ? context.getString(R.string.warning_remove_list_item_element_last)
+                            : context.getString(R.string.warning_remove_list_item_element_message)
+            )
+            .setPositiveButton(context.getString(R.string.button_yes), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    Food item = generalArrayList.get(indexItemToRemove);
+
+                    if(!newItemsArrayList.contains(item)) {
+                        itemsToDeleteArrayList.add(item);
+                    } else {
+                        newItemsArrayList.remove(item);
+                    }
+
+                    generalArrayList.remove(indexItemToRemove);
+                    adapter.notifyDataSetChanged();
+                }
+            })
+            .setNegativeButton(context.getString(R.string.button_no), null)
+            .show();
     }
 
     public static void deleteAllFoodItemsFromDBWhichWereRemoved(DBAdapter localDB, ArrayList<Food> itemsToRemove) {
@@ -264,9 +323,5 @@ public class Helper extends AppCompatActivity {
                 message,
                 Toast.LENGTH_LONG
         ).show();
-    }
-
-    public void dispayWithLog(String tag, String message) {
-        Log.d(tag, message);
     }
 }

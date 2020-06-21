@@ -21,7 +21,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-public class HandleAddMeals {
+public class HandlePictureFromCamera {
 
     // CONSTANTS
     private static final int CAMERA = 10;
@@ -35,7 +35,7 @@ public class HandleAddMeals {
     // Helper & others
     Helper helper = new Helper();
 
-    public HandleAddMeals() {
+    public HandlePictureFromCamera() {
         absolutePath = Environment.getExternalStorageDirectory().getAbsolutePath();
     }
 
