@@ -146,11 +146,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void handleCreateNewGoogleCalendar() {
+        final String calendarId = localDB.getCalendarId(uid);
         new Thread(new Runnable() {
             @Override
             public void run() {
                 try {
-                    String calendarId = localDB.getCalendarId(uid);
                     Log.e("CHECK IF CALENDAR ID EXISTS FROM LOCAL DB =======> ", calendarId == null ? "NULL" : calendarId);
                     // check if the calendar exists
                     if(calendarId == null) {

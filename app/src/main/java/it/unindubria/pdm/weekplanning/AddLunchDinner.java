@@ -59,6 +59,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
     private ListView listViewLunchDinner;
     private String dateSelected;
     private String lunchOrDinner;
+    private String summaryGoogleCalendarEvent;
     Map<String, Integer> prioritySubCategories;
     private String startTime = null;
     private String endTime = null;
@@ -132,6 +133,14 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         dateSelected = mainActivityIntent.getStringExtra("dateString");
         lunchOrDinner = mainActivityIntent.getStringExtra("lunchOrDinner");
         weekPlanningCalendarId = mainActivityIntent.getStringExtra("calendarId");
+
+        summaryGoogleCalendarEvent = getString(
+            getResources().getIdentifier(
+                "section_meal_" + lunchOrDinner,
+                "string",
+                getPackageName()
+            )
+        );
 
         // open connection to local SQLite database
         localDB = DBAdapter.getInstance(AddLunchDinner.this);
@@ -325,6 +334,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
             new Thread(new Runnable() {
                 public void run() {
                     try {
+                        updateLocalDB();
                         if(googleCalendarEvent != null) {
                             if(
                                 listFoodItemsNew.size() > 0 ||
@@ -361,7 +371,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
                             idGoogleCalendarEvent = GoogleCalendarHelper.createNewEvent(
                                     service,
                                     weekPlanningCalendarId,
-                                    lunchOrDinner,
+                                    summaryGoogleCalendarEvent,
                                     allFoodItemsStringCalendarEvent,
                                     dateSelected,
                                     startTime,
@@ -377,7 +387,6 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
                                     lunchOrDinner
                             ));
                         }
-                        updateLocalDB();
                     } catch(UserRecoverableAuthIOException exc) {
                         AddLunchDinner.this.startActivityForResult(
                                 exc.getIntent(),
