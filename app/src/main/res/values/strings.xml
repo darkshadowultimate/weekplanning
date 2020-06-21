@@ -3,21 +3,21 @@
 
     <!-- CONSTANTS -->
         <!-- Type of meals -->
-        <string name="constant_breakfast">breakfast</string>
-        <string name="constant_lunch">lunch</string>
-        <string name="constant_dinner">dinner</string>
+        <string name="constant_breakfast" translatable="false">breakfast</string>
+        <string name="constant_lunch" translatable="false">lunch</string>
+        <string name="constant_dinner" translatable="false">dinner</string>
         <!-- Intent extra fields to breakfast/lunch/dinner -->
-        <string name="constant_intent_dateString">dateString</string>
-        <string name="constant_intent_calendarId">calendarId</string>
-        <string name="constant_intent_lunchOrDinner">lunchOrDinner</string>
+        <string name="constant_intent_dateString" translatable="false">dateString</string>
+        <string name="constant_intent_calendarId" translatable="false">calendarId</string>
+        <string name="constant_intent_lunchOrDinner" translatable="false">lunchOrDinner</string>
         <!-- Start new activity codes -->
-        <string name="constant_start_activity_code_breakfast">1</string>
-        <string name="constant_start_activity_code_lunchDinner">2</string>
-        <string name="constant_start_activity_code_googleCalPerm">222</string>
-        <string name="constant_start_activity_code_takePicture">11</string>
+        <string name="constant_start_activity_code_breakfast" translatable="false">1</string>
+        <string name="constant_start_activity_code_lunchDinner" translatable="false">2</string>
+        <string name="constant_start_activity_code_googleCalPerm" translatable="false">222</string>
+        <string name="constant_start_activity_code_takePicture" translatable="false">11</string>
         <!-- Permissions codes -->
-        <string name="constant_permission_code_camera">10</string>
-        <string name="constant_permission_code_readWriteStorage">5</string>
+        <string name="constant_permission_code_camera" translatable="false">10</string>
+        <string name="constant_permission_code_readWriteStorage" translatable="false">5</string>
 
     <!-- Menu items -->
     <string name="logout">LOGOUT</string>
@@ -26,7 +26,6 @@
     <string name="error_title">Something went wrong...</string>
     <string name="login_error_fields">All fields must be filled!</string>
     <string name="login_error_auth">Couldn\'t login into the account</string>
-    <string name="signup_error_auth">Couldn\'t create the account</string>
     <string name="insert_empty_item">The field cannot be empty!</string>
     <string name="error_time_not_selected_title">Time not selected</string>
     <string name="error_time_not_selected_message">You have to choose the time for your meal.</string>
@@ -37,7 +36,7 @@
     <string name="error_unable_retrieve_permissions">
         Unable to retrieve permissions
     </string>
-    <string name="ok">OK</string>
+    <string name="ok" translatable="false">OK</string>
 
     <!-- Success messages -->
     <string name="login_success">You\'re logged in</string>
@@ -50,7 +49,7 @@
     <!-- Warning messages -->
     <string name="warning_permission_calendar_title">Permissions required</string>
     <string name="warning_permission_calendar_message">
-        This app won\'t work without the permissions to access the user's Google Calendar.
+        This app won\'t work without this permission.
     </string>
     <string name="warning_logout_title">Sign out</string>
     <string name="warning_logout_message">Do you really wanna sign out?</string>
@@ -72,7 +71,7 @@
     <string name="button_negate">Negate</string>
     <string name="button_allow">Allow</string>
     <string name="button_yes">Yes</string>
-    <string name="button_no">No</string>
+    <string name="button_no" translatable="false">No</string>
 
     <!-- Google Calendar API -->
     <string name="google_calendar_description">
@@ -117,6 +116,6 @@
     <string name="first">FIRST COURSE</string>
     <string name="second">SECOND COURSE</string>
     <string name="after">END OF MEAL</string>
-    <string name="dropdown_label">Type of meal</string>
+    <string name="dropdown_label">Type of course</string>
 
 </resources>
