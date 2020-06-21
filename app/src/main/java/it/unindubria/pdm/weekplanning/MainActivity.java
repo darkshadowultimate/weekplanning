@@ -179,8 +179,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         ArrayList<Food> foodDateList = localDB.getAllFoodItemsDate(uid, selectedDateString);
 
         updateBreakfast(foodDateList);
-        updateLunch(foodDateList, "lunch");
-        updateLunch(foodDateList, "dinner");
+        updateLunch(foodDateList, getString(R.string.constant_lunch));
+        updateLunch(foodDateList, getString(R.string.constant_dinner));
     }
 
     private void updateBreakfast(ArrayList<Food> foodItems) {
@@ -217,9 +217,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             // clear the text in the card
             partOfMealSection.setText("");
 
-            if(allItems.isEmpty()) {
-                //partOfMealSection.setVisibility(View.GONE);
-            } else {
+            if(!allItems.isEmpty()) {
                 isThereLunch = true;
                 partOfMealSection.setText(allItems);
                 partOfMealSection.setVisibility(View.VISIBLE);
@@ -227,7 +225,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
         if(isThereLunch) {
-            if(lunchOrDinner.equals("lunch")) {
+            if(lunchOrDinner.equals(getString(R.string.constant_lunch))) {
                 lunchCard.setVisibility(View.VISIBLE);
                 buttonAddLunch.setVisibility(View.GONE);
             } else {
@@ -235,7 +233,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 buttonAddDinner.setVisibility(View.GONE);
             }
         } else {
-            if(lunchOrDinner.equals("lunch")) {
+            if(lunchOrDinner.equals(getString(R.string.constant_lunch))) {
                 lunchCard.setVisibility(View.GONE);
                 buttonAddLunch.setVisibility(View.VISIBLE);
             } else {
@@ -247,6 +245,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void startActivityForResultMeal(String typeOfMeal) {
         if(typeOfMeal.equals(getString(R.string.constant_breakfast))) {
+            Log.e("READY TO START BREAKFAST ACTIVITY ======> ", typeOfMeal);
             Intent breakfastIntent = new Intent(MainActivity.this, AddBreakfast.class);
             breakfastIntent.putExtra(
                 getString(R.string.constant_intent_dateString),
@@ -257,6 +256,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 weekPlanningCalendarId);
             startActivityForResult(breakfastIntent, helper.getBreakfastCodeStartActivity(MainActivity.this));
         } else {
+            Log.e("READY TO START LUNCH/DINNER ACTIVITY ======> ", typeOfMeal);
             Intent lunchIntent = new Intent(MainActivity.this, AddLunchDinner.class);
             lunchIntent.putExtra(
                     getString(R.string.constant_intent_dateString),
@@ -264,7 +264,11 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
             );
             lunchIntent.putExtra(
                 getString(R.string.constant_intent_lunchOrDinner),
-                typeOfMeal.equals(getString(R.string.constant_lunch))
+                typeOfMeal
+            );
+            lunchIntent.putExtra(
+                getString(R.string.constant_intent_calendarId),
+                weekPlanningCalendarId
             );
             startActivityForResult(lunchIntent, helper.getLunchDinnerCodeStartActivity(MainActivity.this));
         }
@@ -295,7 +299,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         int month = calendar.get(java.util.Calendar.MONTH);
         int year = calendar.get(java.util.Calendar.YEAR);
 
-        selectedDateString = helper.getStringDate(dayOfMonth, month, year);
+        selectedDateString = helper.getStringDate(dayOfMonth, month + 1, year);
     }
 
     private void setListernerCalendarView() {

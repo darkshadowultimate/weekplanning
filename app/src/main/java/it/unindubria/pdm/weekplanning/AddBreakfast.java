@@ -299,8 +299,6 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
             listFoodItems.add(0, food);
             adapter.notifyDataSetChanged();
 
-            //saveInfoToDB(food);
-
             editTextFood.setText("");
         } else {
             helper.displayWithToast(AddBreakfast.this, R.string.insert_empty_item);
@@ -312,15 +310,6 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
 
         if(cameraIntent != null && cameraIntent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(cameraIntent, helper.getTakePictureCodeStartActivity(AddBreakfast.this));
-        }
-    }
-
-    private void saveInfoToDB(Food item) {
-        if(listFoodItems.size() > 0) {
-            // update local SQLite database
-            long idItem = localDB.insert(item);
-
-            item.setId(idItem);
         }
     }
 
@@ -389,8 +378,6 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
                             }
                             listFoodItems.remove(position);
                             adapter.notifyDataSetChanged();
-
-                            //localDB.removeFoodItem(item.getId());
                         }
                     })
                     .setNegativeButton("No", null)
@@ -411,7 +398,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
                 // otherwise update the SQLite DB and the google calendar's event
                 if(listFoodItems.size() == 0) {
                     // delete the image
-                    handleAddMeals.handleDeleteImage(false, uid, dateSelected, "breakfast", previewImage, AddBreakfast.this);
+                    handleAddMeals.handleDeleteImage(false, uid, dateSelected, getString(R.string.constant_breakfast), previewImage, AddBreakfast.this);
                     // delete the google calendar's event
                     Helper.deleteGoogleCalendarEvent(
                         service,
@@ -455,6 +442,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onBackPressed() {
-        finishActivityAndGoBack();
+        setResult(Activity.RESULT_OK, new Intent());
+        finish();
     }
 }

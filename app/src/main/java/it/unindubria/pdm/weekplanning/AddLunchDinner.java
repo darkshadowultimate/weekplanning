@@ -2,6 +2,7 @@ package it.unindubria.pdm.weekplanning;
 
 import android.Manifest;
 import android.app.Activity;
+import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -15,6 +16,7 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -23,7 +25,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.Spinner;
+import android.widget.TimePicker;
 
+import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -31,33 +35,39 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
 
 public class AddLunchDinner extends AppCompatActivity implements View.OnClickListener {
-
-    // CONSTANTS
-    private final String[] SUBCATEGORIES_VOICES_DB = { "before", "first", "second", "after" };
-    private static final int CAMERA = 10;
-    private static final int READ_WRITE_FROM_STORAGE = 5;
-    private static final int TAKE_PHOTO_CODE = 11;
-
     // Firebase
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
     private String uid;
+    // Google Calendar API
+    // service => used to authenticate all requests to Google APIs with OAuth2
+    private com.google.api.services.calendar.Calendar service;
+    private GoogleCalendarEvent googleCalendarEvent = null;
+    private String weekPlanningCalendarId = "";
+    private String idGoogleCalendarEvent = "";
 
     // class' variables
     private ArrayList<Food> listFoodItemsLunchDinner;
+    private ArrayList<Food> listFoodItemsNew;
+    private ArrayList<Food> listFoodItemsToDelete;
     private ArrayAdapter<Food> adapterLunchDinner;
     private ListView listViewLunchDinner;
     private String dateSelected;
     private String lunchOrDinner;
     Map<String, Integer> prioritySubCategories;
+    private String startTime = null;
+    private String endTime = null;
 
     // UI elements
     private EditText editTextFood;
     private Button addFoodItemButton;
+    private Button timePickerStartButton;
+    private Button timePickerEndButton;
     private Button takePicture;
     private Button saveButton;
     private ImageView previewImage;
@@ -84,17 +94,26 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
             uid = mFirebaseUser.getUid();
         }
 
+        service = GoogleCalendarHelper.getCalendarBuilderInstance(
+                AddLunchDinner.this,
+                mFirebaseUser.getEmail()
+        );
+
         // connect elements to UI
-        editTextFood = findViewById(R.id.dinner_lunch_insert_food);
-        addFoodItemButton = findViewById(R.id.add_item_dinner_lunch);
+        editTextFood = findViewById(R.id.insert_food);
+        addFoodItemButton = findViewById(R.id.add_item_meal);
+        timePickerStartButton = findViewById(R.id.time_picker_start);
+        timePickerEndButton = findViewById(R.id.time_picker_end);
         takePicture = findViewById(R.id.take_picture_button);
-        saveButton = findViewById(R.id.dinner_lunch_finish_button);
+        saveButton = findViewById(R.id.finish_button);
         previewImage = findViewById(R.id.preview_image_meal);
-        listViewLunchDinner = findViewById(R.id.listview_dinner_lunch);
+        listViewLunchDinner = findViewById(R.id.list_food_items_meal);
         dropdown_subcategories = findViewById(R.id.dropdown_subcategory);
 
         // setting listeners
         addFoodItemButton.setOnClickListener(this);
+        timePickerStartButton.setOnClickListener(this);
+        timePickerEndButton.setOnClickListener(this);
         takePicture.setOnClickListener(this);
         saveButton.setOnClickListener(this);
         previewImage.setOnClickListener(this);
@@ -112,15 +131,36 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         // saving the date choosen by the user already formatted
         dateSelected = mainActivityIntent.getStringExtra("dateString");
         lunchOrDinner = mainActivityIntent.getStringExtra("lunchOrDinner");
+        weekPlanningCalendarId = mainActivityIntent.getStringExtra("calendarId");
 
         // open connection to local SQLite database
         localDB = DBAdapter.getInstance(AddLunchDinner.this);
         localDB.openWrite();
 
+        // loading values of startTime and endTime from localDB
+        googleCalendarEvent = localDB.getGoogleCalendarEvent(dateSelected, lunchOrDinner);
+
+        if(googleCalendarEvent != null) {
+            Log.e("CHECK CLASS", "googleCalendarEvent IS NOT NULL");
+
+            startTime = googleCalendarEvent.getTimeStart();
+            endTime = googleCalendarEvent.getTimeEnd();
+            idGoogleCalendarEvent = googleCalendarEvent.getId();
+
+            Log.e("CHECK VARIABLES TIME", startTime + "  ---  " + endTime);
+
+            timePickerStartButton.setText(startTime);
+            timePickerEndButton.setText(endTime);
+        } else {
+            Log.e("CHECK CLASS", "googleCalendarEvent IS ABSOLUTELY NULL");
+        }
+
         handleAddMeals.setPreviewImage(uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this, AddLunchDinner.this);
 
         // setting up listview and adapter
         listFoodItemsLunchDinner = new ArrayList<Food>();
+        listFoodItemsNew = new ArrayList<Food>();
+        listFoodItemsToDelete = new ArrayList<Food>();
         adapterLunchDinner = new ArrayAdapter<Food>(AddLunchDinner.this, android.R.layout.simple_list_item_1, listFoodItemsLunchDinner);
         listViewLunchDinner.setAdapter(adapterLunchDinner);
 
@@ -131,7 +171,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onClick(View view) {
         switch(view.getId()) {
-            case R.id.add_item_dinner_lunch:
+            case R.id.add_item_meal:
                 if(listFoodItemsLunchDinner.size() < 20) {
                     addFoodItem();
                 } else {
@@ -145,29 +185,72 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
             case R.id.preview_image_meal:
                 handleAddMeals.handleDeleteImage(true, uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this);
                 break;
+            case R.id.time_picker_start:
+                setTimeSelected(true);
+                break;
+            case R.id.time_picker_end:
+                setTimeSelected(false);
+                break;
             case R.id.take_picture_button:
                 takePictureFromCamera();
                 break;
-            case R.id.dinner_lunch_finish_button:
+            case R.id.finish_button:
                 finishActivityAndGoBack();
                 break;
         }
     }
 
     private String getSubcategoryStringValueForDB(String valueSelected) {
-        for(int i = 0; i < SUBCATEGORIES_VOICES_DB.length; i++) {
+        for(int i = 0; i < Helper.SUBCATEGORIES_VOICES_DB.length; i++) {
             if(dropdown_subcategories.getItemAtPosition(i).toString().equals(valueSelected)) {
-                return SUBCATEGORIES_VOICES_DB[i];
+                return Helper.SUBCATEGORIES_VOICES_DB[i];
             }
         }
         return null;
+    }
+
+    private void setTimeSelected(final boolean isStartTime) {
+        int initialHours, initialMinutes;
+
+        if(startTime != null && endTime != null) {
+            if(isStartTime) {
+                initialHours = helper.getHoursFromString(startTime);
+                initialMinutes = helper.getMinutesFromString(startTime);
+            } else {
+                initialHours = helper.getHoursFromString(endTime);
+                initialMinutes = helper.getMinutesFromString(endTime);
+            }
+        } else {
+            Calendar calendarUtil = Calendar.getInstance();
+
+            initialHours = calendarUtil.get(Calendar.HOUR_OF_DAY);
+            initialMinutes = calendarUtil.get(Calendar.MINUTE);
+        }
+
+        TimePickerDialog timePickerDialog = new TimePickerDialog(AddLunchDinner.this, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+                String timeSelected = helper.getStringTime(hourOfDay, minute);
+                if(isStartTime) {
+                    startTime = timeSelected;
+                    timePickerStartButton.setText(startTime);
+                    Log.e("START TIME VALUE =====> ", startTime);
+                } else {
+                    endTime = timeSelected;
+                    timePickerEndButton.setText(endTime);
+                    Log.e("END TIME VALUE =====> ", endTime);
+                }
+            }
+        }, initialHours, initialMinutes, true);
+
+        timePickerDialog.show();
     }
 
     private void takePictureFromCamera() {
         Intent cameraIntent = handleAddMeals.takePicture(uid, dateSelected, lunchOrDinner, AddLunchDinner.this, AddLunchDinner.this);
 
         if(cameraIntent != null && cameraIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(cameraIntent, TAKE_PHOTO_CODE);
+            startActivityForResult(cameraIntent, helper.getTakePictureCodeStartActivity(AddLunchDinner.this));
         }
     }
 
@@ -180,13 +263,15 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         Food food = new Food(nameFoodItem, dateSelected, lunchOrDinner, subcategory, uid);
 
         food.setSubcategoryTranslation(getTranslationSubcategory(food.getSubcategory()));
-        //insertItemToArrayList(food);
-        listFoodItemsLunchDinner.add(getPositionToInsertItem(food), food);
-        //sortListFoodItems(listFoodItemsLunchDinner);
+
+        int positionToInsertItem = getPositionToInsertItem(food);
+
+        Log.e("POSITION TO INSERT THE ELEMENT =====> ", String.valueOf(positionToInsertItem));
+
+        listFoodItemsNew.add(food);
+        listFoodItemsLunchDinner.add(positionToInsertItem, food);
 
         adapterLunchDinner.notifyDataSetChanged();
-
-        saveInfoToDB(food);
 
         // The user could add more items at the time.
         // Clearing the focus and hiding the keyboard would be bad UX.
@@ -198,24 +283,13 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         int counter;
 
         for(counter = 0; counter < listFoodItemsLunchDinner.size(); counter++) {
-            int priorityValItem = prioritySubCategories
-                    .get(listFoodItemsLunchDinner
-                            .get(counter).getSubcategory());
+            int priorityValItem = prioritySubCategories.get(listFoodItemsLunchDinner.get(counter).getSubcategory());
 
             if(priorityValArg < priorityValItem) {
                 return counter;
             }
         }
         return counter;
-    }
-
-    private void saveInfoToDB(Food item) {
-        if(listFoodItemsLunchDinner.size() > 0) {
-            // update local SQLite database
-            long idItem = localDB.insert(item);
-
-            item.setId(idItem);
-        }
     }
 
     private String getTranslationSubcategory(String keyword) {
@@ -231,7 +305,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
     }
 
     private void sortListFoodItems(ArrayList<Food> listToOrder) {
-        for (String valueCategory : SUBCATEGORIES_VOICES_DB) {
+        for (String valueCategory : Helper.SUBCATEGORIES_VOICES_DB) {
             for(Food item: listToOrder) {
                 if(item.getSubcategory().equals(valueCategory)) {
                     item.setSubcategoryTranslation(getTranslationSubcategory(item.getSubcategory()));
@@ -244,16 +318,89 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         return;
     }
 
+    private void insertUpdateMealGoogleCalendar() {
+        final String allFoodItemsStringCalendarEvent = Helper.getStringListLunchDinnerItemsForDB(listFoodItemsLunchDinner, lunchOrDinner, AddLunchDinner.this);
+
+        if(startTime != null && endTime != null && listFoodItemsLunchDinner.size() > 0) {
+            new Thread(new Runnable() {
+                public void run() {
+                    try {
+                        if(googleCalendarEvent != null) {
+                            if(
+                                listFoodItemsNew.size() > 0 ||
+                                listFoodItemsToDelete.size() > 0 ||
+                                !googleCalendarEvent.getTimeStart().equals(startTime) ||
+                                !googleCalendarEvent.getTimeEnd().equals(endTime)
+                            ) {
+                                Log.e("CHECK FOR UPDATE EVENT", "UPDATE EVENT");
+
+                                GoogleCalendarHelper.updateCalendarEvent(
+                                        service,
+                                        weekPlanningCalendarId,
+                                        idGoogleCalendarEvent,
+                                        dateSelected,
+                                        startTime,
+                                        endTime,
+                                        allFoodItemsStringCalendarEvent
+                                );
+
+                                localDB.updateGoogleCalendarEvent(new GoogleCalendarEvent(
+                                        idGoogleCalendarEvent,
+                                        startTime,
+                                        endTime,
+                                        "",
+                                        dateSelected,
+                                        lunchOrDinner
+                                ));
+                            } else {
+                                Log.e("CHECK FOR UPDATE EVENT", "NOT UPDATED!!!!!");
+                            }
+                        } else {
+                            Log.e("CHECK FOR INSERT EVENT", "INSERT EVENT");
+
+                            idGoogleCalendarEvent = GoogleCalendarHelper.createNewEvent(
+                                    service,
+                                    weekPlanningCalendarId,
+                                    lunchOrDinner,
+                                    allFoodItemsStringCalendarEvent,
+                                    dateSelected,
+                                    startTime,
+                                    endTime
+                            );
+
+                            localDB.insertGoogleCalendarEvent(new GoogleCalendarEvent(
+                                    idGoogleCalendarEvent,
+                                    startTime,
+                                    endTime,
+                                    "",
+                                    dateSelected,
+                                    lunchOrDinner
+                            ));
+                        }
+                        updateLocalDB();
+                    } catch(UserRecoverableAuthIOException exc) {
+                        AddLunchDinner.this.startActivityForResult(
+                                exc.getIntent(),
+                                helper.getGoogleCalendarCodeStartActivity(AddLunchDinner.this)
+                        );
+                    } catch (IOException exc) {
+                        Log.e("CALENDAR INFO", "ERROR CALENDAR READING ID", exc);
+                    }
+                }
+            }).start();
+        }
+    }
+
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        if (requestCode == CAMERA) {
+        if (requestCode == helper.getCameraPermissionCode(AddLunchDinner.this)) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 helper.displayWithToast(AddLunchDinner.this, "Now you can take pictures!");
             } else {
                 helper.displayWithToast(AddLunchDinner.this, "Cannot to take or save pictures");
             }
-        } else if (requestCode == READ_WRITE_FROM_STORAGE) {
+        } else if (requestCode == helper.getStoragePermissionCode(AddLunchDinner.this)) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 handleAddMeals.setPreviewImage(uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this, AddLunchDinner.this);
                 helper.displayWithToast(AddLunchDinner.this, "Take your picture again, please.");
@@ -267,7 +414,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == TAKE_PHOTO_CODE && resultCode == RESULT_OK) {
+        if (requestCode == helper.getTakePictureCodeStartActivity(AddLunchDinner.this) && resultCode == RESULT_OK) {
             handleAddMeals.setPreviewImage(uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this, AddLunchDinner.this);
         }
     }
@@ -276,34 +423,101 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         listViewLunchDinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
-                new AlertDialog
-                    .Builder(AddLunchDinner.this)
-                    .setTitle("Remove element")
-                    .setMessage("Do you really wanna remove this element?")
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                        @Override
-                        public void onClick(DialogInterface dialog, int which) {
-                            Food item = listFoodItemsLunchDinner.get(position);
+            new AlertDialog
+                .Builder(AddLunchDinner.this)
+                .setTitle("Remove element")
+                .setMessage("Do you really wanna remove this element?")
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    Food item = listFoodItemsLunchDinner.get(position);
 
-                            listFoodItemsLunchDinner.remove(position);
-                            adapterLunchDinner.notifyDataSetChanged();
+                    if(!listFoodItemsNew.contains(item)) {
+                        listFoodItemsToDelete.add(item);
+                    } else {
+                        listFoodItemsNew.remove(item);
+                    }
 
-                            localDB.removeFoodItem(item.getId());
-                        }
-                    })
-                    .setNegativeButton("No", null)
-                    .show();
+                    listFoodItemsLunchDinner.remove(position);
+                    adapterLunchDinner.notifyDataSetChanged();
+                    }
+                })
+                .setNegativeButton("No", null)
+                .show();
             }
         });
     }
 
+    private void updateLocalDB() {
+        Helper.addAllFoodItemsToDBWhichWereAdded(localDB, listFoodItemsNew);
+        Helper.deleteAllFoodItemsFromDBWhichWereRemoved(localDB, listFoodItemsToDelete);
+    }
+
     private void finishActivityAndGoBack() {
-        setResult(Activity.RESULT_OK, new Intent());
-        finish();
+        Log.e("CONDITION START_TIME & END_TIME =======> ", String.valueOf(startTime != null && endTime != null));
+        // startTime and endTime must have a value
+        if(startTime != null && endTime != null) {
+            Log.e("START_TIME AND END_TIME HAVE VALUES", startTime + " ---- " + endTime);
+            // startTime must be less than endTime
+            if(helper.isEndTimeBiggerThanStartTime(startTime, endTime)) {
+                // if there are no meal's items,
+                // than delete the google calendar's event and the meal's picture (if they exist)
+                // otherwise update the SQLite DB and the google calendar's event
+                if(listFoodItemsLunchDinner.size() == 0) {
+                    Log.e("deleteGoogleCalendarEvent", "CALL FUNCTION TO DELETE");
+                    updateLocalDB();
+                    // delete the image
+                    handleAddMeals.handleDeleteImage(false, uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this);
+                    // delete the google calendar's event
+                    Helper.deleteGoogleCalendarEvent(
+                            service,
+                            localDB,
+                            googleCalendarEvent,
+                            weekPlanningCalendarId,
+                            idGoogleCalendarEvent,
+                            dateSelected,
+                            lunchOrDinner
+                    );
+                } else {
+                    Log.e("insertUpdateMealGoogleCalendar", "CALL FUNCTION TO INSERT OR UPDATE");
+                    // insert or update a google calendar's event
+                    insertUpdateMealGoogleCalendar();
+                }
+                // set the result of the activityForResult and terminate the activity
+                setResult(Activity.RESULT_OK, new Intent());
+                finish();
+            } else {
+                Log.e("ERROR START_TIME > END_TIME =======> ", startTime + " ---- " + endTime);
+                // warn the user than the startTime must be less than endTime
+                helper.displayWithDialog(
+                        AddLunchDinner.this,
+                        getString(R.string.error_timestart_less_than_timeend_title),
+                        getString(R.string.error_timestart_less_than_timeend_message)
+                );
+            }
+        } else if(listFoodItemsLunchDinner.size() > 0) {
+            Log.e(
+            "ERROR START_TIME OR/AND END_TIME HAVE NO VALUES =======> ",
+            (startTime == null ? "null" : startTime) + " ---- " + (endTime == null ? "null" : endTime)
+            );
+            // if there are meal's items and the startTime or the endTime is not set,
+            // display an error message
+            helper.displayWithDialog(
+                    AddLunchDinner.this,
+                    getString(R.string.error_time_not_selected_title),
+                    getString(R.string.error_time_not_selected_message)
+            );
+        } else {
+            // if there are no meal's items and the time is not set,
+            // than terminate the activity
+            setResult(Activity.RESULT_OK, new Intent());
+            finish();
+        }
     }
 
     @Override
     public void onBackPressed() {
-        finishActivityAndGoBack();
+        setResult(Activity.RESULT_OK, new Intent());
+        finish();
     }
 }

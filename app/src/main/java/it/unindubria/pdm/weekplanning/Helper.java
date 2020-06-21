@@ -6,6 +6,7 @@ import android.os.Environment;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
 
 import com.google.api.services.calendar.Calendar;
@@ -17,6 +18,8 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 
 public class Helper extends AppCompatActivity {
+
+    public static final String[] SUBCATEGORIES_VOICES_DB = { "before", "first", "second", "after" };
 
     public Intent changeActivity(Context context, Class classToLoad) {
         Intent intent = new Intent(context, classToLoad);
@@ -68,6 +71,27 @@ public class Helper extends AppCompatActivity {
         }
 
         return arrayListItems;
+    }
+
+    public static String getStringListLunchDinnerItemsForDB(ArrayList<Food> foodItems, String lunchOrDinner, Context context) {
+        String allItems = "";
+
+        for (String subcategory : SUBCATEGORIES_VOICES_DB) {
+            String itemsOfCurrentSubCategory = "";
+
+            for (Food item : foodItems) {
+                if (item.getCategory().equals(lunchOrDinner) && item.getSubcategory().equals(subcategory)) {
+                    itemsOfCurrentSubCategory += "\t- " + item.getName() + "\n";
+                }
+            }
+            if(!itemsOfCurrentSubCategory.isEmpty()) {
+                int codeSubcategoryTranslated = context
+                    .getResources().getIdentifier(subcategory, "string", context.getPackageName());
+                allItems += context.getString(codeSubcategoryTranslated) + ":\n" + itemsOfCurrentSubCategory;
+            }
+        }
+
+        return allItems;
     }
 
     public boolean areListItemsDifferent(ArrayList<String> listItemsString, ArrayList<Food> listItemsFood) {
