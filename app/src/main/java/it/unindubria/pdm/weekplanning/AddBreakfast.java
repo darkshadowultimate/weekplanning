@@ -205,6 +205,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
                                     dateSelected,
                                     startTime,
                                     endTime,
+                                    getString(R.string.section_meal_breakfast),
                                     allFoodItemsStringCalendarEvent
                                 );
 
@@ -360,13 +361,13 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
                 new AlertDialog
                     .Builder(AddBreakfast.this)
-                    .setTitle("Remove element")
+                    .setTitle(getString(R.string.warning_remove_list_item_element_title))
                     .setMessage(
                         listFoodItems.size() == 1
                             ? getString(R.string.warning_remove_list_item_element_last)
-                            : getString(R.string.warning_remove_list_item_element)
+                            : getString(R.string.warning_remove_list_item_element_message)
                     )
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    .setPositiveButton(getString(R.string.button_yes), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             Food item = listFoodItems.get(position);
@@ -380,7 +381,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
                             adapter.notifyDataSetChanged();
                         }
                     })
-                    .setNegativeButton("No", null)
+                    .setNegativeButton(getString(R.string.button_no), null)
                     .show();
             }
         });

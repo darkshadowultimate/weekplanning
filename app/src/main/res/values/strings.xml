@@ -53,7 +53,8 @@
     </string>
     <string name="warning_logout_title">Sign out</string>
     <string name="warning_logout_message">Do you really wanna sign out?</string>
-    <string name="warning_remove_list_item_element">Do you really wanna remove this element?</string>
+    <string name="warning_remove_list_item_element_title">Remove element</string>
+    <string name="warning_remove_list_item_element_message">Do you really wanna remove this element?</string>
     <string name="warning_remove_list_item_element_last">
         If you remove this element, your meal will be removed, too.
         \nDo you want to proceed?

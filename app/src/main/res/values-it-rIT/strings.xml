@@ -13,13 +13,19 @@
     <string name="error_unable_retrieve_permissions">Permessi non concessi</string>
     <string name="login_success">Accesso effettuato</string>
     <string name="login_welcome">Benvenuto in</string>
-    <string name="whyGoogleLogin">WeekPlanning sincronizza l\'app con il tuo calendario Google. Per fare questo, devi effettuare l\'accesso con il tuo account Google.</string>
+    <string name="whyGoogleLogin">
+        WeekPlanning sincronizza l\'app con il tuo calendario Google.\n\n
+        Per fare questo, devi effettuare l\'accesso con il tuo account Google.
+    </string>
     <string name="warning_permission_calendar_title">Permessi essenziali</string>
     <string name="warning_permission_calendar_message">Quest\'app non funzionerà senza questo permesso</string>
     <string name="warning_logout_title">Esci</string>
     <string name="warning_logout_message">Vuoi davvero uscire?</string>
-    <string name="warning_remove_list_item_element">Vuoi veramente rimuovere questo elemento?</string>
-    <string name="warning_remove_list_item_element_last">Se salverai una lista vuota, il tuo pasto verrà eliminato. Vuoi procedere?</string>
+    <string name="warning_remove_list_item_element_message">Vuoi veramente rimuovere questo elemento?</string>
+    <string name="warning_remove_list_item_element_last">
+        Se salverai una lista vuota, il tuo pasto verrà eliminato.
+        \nVuoi procedere?
+    </string>
     <string name="button_add_breakfast">Aggiungi colazione</string>
     <string name="button_add_lunch">Aggiungi pranzo</string>
     <string name="button_add_dinner">Aggiungi cena</string>
@@ -53,4 +59,11 @@
     <string name="second">SECONDA PORTATA</string>
     <string name="after">FINE PASTO</string>
     <string name="dropdown_label">TIPO DI PORTATA</string>
+    <string-array name="dropdown_part_meal">
+        <item>Antipasto</item>
+        <item>Prima portata</item>
+        <item>Seconda portata</item>
+        <item>Fine pasto</item>
+    </string-array>
+    <string name="warning_remove_list_item_element_title">Rimozione elemento</string>
 </resources>

@@ -101,12 +101,14 @@ public class GoogleCalendarHelper {
         String date,
         String timeStart,
         String timeEnd,
+        String summary,
         String description
     ) throws IOException {
         Event event = service.events().get(idCalendar, idGoogleCalendarEvent).execute();
 
         event.setStart(convertToEventDateTime(date, timeStart));
         event.setEnd(convertToEventDateTime(date, timeEnd));
+        event.setSummary(summary);
         event.setDescription(description);
 
         service.events().patch(idCalendar, event.getId(), event).execute();

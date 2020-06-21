@@ -351,6 +351,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
                                         dateSelected,
                                         startTime,
                                         endTime,
+                                        summaryGoogleCalendarEvent,
                                         allFoodItemsStringCalendarEvent
                                 );
 
@@ -434,9 +435,13 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
             public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
             new AlertDialog
                 .Builder(AddLunchDinner.this)
-                .setTitle("Remove element")
-                .setMessage("Do you really wanna remove this element?")
-                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                .setTitle(getString(R.string.warning_remove_list_item_element_message))
+                .setMessage(
+                    listFoodItemsLunchDinner.size() == 1
+                        ? getString(R.string.warning_remove_list_item_element_last)
+                        : getString(R.string.warning_remove_list_item_element_message)
+                )
+                .setPositiveButton(getString(R.string.button_yes), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                     Food item = listFoodItemsLunchDinner.get(position);
@@ -451,7 +456,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
                     adapterLunchDinner.notifyDataSetChanged();
                     }
                 })
-                .setNegativeButton("No", null)
+                .setNegativeButton(getString(R.string.button_no), null)
                 .show();
             }
         });
