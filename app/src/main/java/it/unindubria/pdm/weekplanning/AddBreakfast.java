@@ -297,16 +297,15 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == helper.getCameraPermissionCode(AddBreakfast.this)) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                helper.displayWithToast(AddBreakfast.this, "Now you can take pictures!");
+                helper.displayWithToast(AddBreakfast.this, getString(R.string.success_can_take_picture));
             } else {
-                helper.displayWithToast(AddBreakfast.this, "Cannot to take or save pictures");
+                helper.displayWithToast(AddBreakfast.this, getString(R.string.error_cannot_take_picture));
             }
         } else if (requestCode == helper.getStoragePermissionCode(AddBreakfast.this)) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 handlePictureFromCamera.setPreviewImage(uid, dateSelected, getString(R.string.constant_breakfast), previewImage, AddBreakfast.this, AddBreakfast.this);
-                helper.displayWithToast(AddBreakfast.this, "Take your picture again, please.");
             } else {
-                helper.displayWithToast(AddBreakfast.this, "Cannot to take or save pictures");
+                helper.displayWithToast(AddBreakfast.this, getString(R.string.error_cannot_save_picture));
             }
         }
     }

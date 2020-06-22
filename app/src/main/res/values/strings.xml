@@ -6,6 +6,11 @@
         <string name="constant_breakfast" translatable="false">breakfast</string>
         <string name="constant_lunch" translatable="false">lunch</string>
         <string name="constant_dinner" translatable="false">dinner</string>
+        <!-- Keywords for meals' subcategories -->
+        <string name="constant_before" translatable="false">before</string>
+        <string name="constant_first" translatable="false">first</string>
+        <string name="constant_second" translatable="false">second</string>
+        <string name="constant_after" translatable="false">after</string>
         <!-- Intent extra fields to breakfast/lunch/dinner -->
         <string name="constant_intent_dateString" translatable="false">dateString</string>
         <string name="constant_intent_calendarId" translatable="false">calendarId</string>
@@ -44,6 +49,8 @@
     <string name="error_no_network_message">
         Activate your network to use this app.
     </string>
+    <string name="error_cannot_take_picture">You can\'t take pictures</string>
+    <string name="error_cannot_save_picture">You can\'t save pictures</string>
     <string name="ok" translatable="false">OK</string>
 
     <!-- Success messages -->
@@ -53,6 +60,7 @@
         WeekPlanning synchronizes the app with your Google Calendar.\n\n
         In order to do so, we need you to sign in with your Google account
     </string>
+    <string name="success_can_take_picture">Now you can take pictures!</string>
 
     <!-- Warning messages -->
     <string name="warning_permission_calendar_title">Permissions required</string>

@@ -15,7 +15,7 @@
     <string name="login_welcome">Benvenuto in</string>
     <string name="whyGoogleLogin">
         WeekPlanning sincronizza l\'app con il tuo calendario Google.\n\n
-        Per fare questo, devi effettuare l\'accesso con il tuo account Google.
+        Perciò, avrai bisogno di accedere con il tuo account Google.
     </string>
     <string name="warning_permission_calendar_title">Permessi essenziali</string>
     <string name="warning_permission_calendar_message">Quest\'app non funzionerà senza questo permesso</string>
@@ -70,4 +70,7 @@
     <string name="error_google_play_services_unavailable_message">Per utilizzare l\'app installare Google Play Services.</string>
     <string name="error_no_network_title">Internet non attivo</string>
     <string name="error_no_network_message">Connettiti ad Internet per utilizzare l\'app</string>
+    <string name="success_can_take_picture">Ora puoi scattare le foto!</string>
+    <string name="error_cannot_take_picture">Non puoi scattare foto</string>
+    <string name="error_cannot_save_picture">Non puoi salvare le foto</string>
 </resources>

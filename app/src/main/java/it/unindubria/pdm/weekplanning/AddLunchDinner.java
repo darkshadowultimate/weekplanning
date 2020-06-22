@@ -29,6 +29,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class AddLunchDinner extends AppCompatActivity implements View.OnClickListener {
+    // CONSTANTS
+    private static String[] SUBCATEGORIES_VOICES_DB;
     // Firebase
     private FirebaseAuth mFirebaseAuth;
     private FirebaseUser mFirebaseUser;
@@ -83,6 +85,8 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
             uid = mFirebaseUser.getUid();
         }
 
+        SUBCATEGORIES_VOICES_DB = Helper.getSUBCATEGORIES_VOICES_DB(AddLunchDinner.this);
+
         service = GoogleCalendarHelper.getCalendarBuilderInstance(
                 AddLunchDinner.this,
                 mFirebaseUser.getEmail()
@@ -110,17 +114,17 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
 
         // setting variables' values
         prioritySubCategories = new HashMap<String, Integer>();
-        prioritySubCategories.put("before", new Integer(0));
-        prioritySubCategories.put("first", new Integer(1));
-        prioritySubCategories.put("second", new Integer(2));
-        prioritySubCategories.put("after", new Integer(3));
+        prioritySubCategories.put(getString(R.string.constant_before), new Integer(0));
+        prioritySubCategories.put(getString(R.string.constant_first), new Integer(1));
+        prioritySubCategories.put(getString(R.string.constant_second), new Integer(2));
+        prioritySubCategories.put(getString(R.string.constant_after), new Integer(3));
 
         // getting data from intent
         Intent mainActivityIntent = getIntent();
         // saving the date choosen by the user already formatted
-        dateSelected = mainActivityIntent.getStringExtra("dateString");
-        lunchOrDinner = mainActivityIntent.getStringExtra("lunchOrDinner");
-        weekPlanningCalendarId = mainActivityIntent.getStringExtra("calendarId");
+        dateSelected = mainActivityIntent.getStringExtra(getString(R.string.constant_intent_dateString));
+        lunchOrDinner = mainActivityIntent.getStringExtra(getString(R.string.constant_intent_lunchOrDinner));
+        weekPlanningCalendarId = mainActivityIntent.getStringExtra(getString(R.string.constant_intent_calendarId));
 
         summaryGoogleCalendarEvent = getString(
             getResources().getIdentifier(
@@ -202,9 +206,9 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
     }
 
     private String getSubcategoryStringValueForDB(String valueSelected) {
-        for(int i = 0; i < Helper.SUBCATEGORIES_VOICES_DB.length; i++) {
+        for(int i = 0; i < SUBCATEGORIES_VOICES_DB.length; i++) {
             if(dropdown_subcategories.getItemAtPosition(i).toString().equals(valueSelected)) {
-                return Helper.SUBCATEGORIES_VOICES_DB[i];
+                return SUBCATEGORIES_VOICES_DB[i];
             }
         }
         return null;
@@ -279,7 +283,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
     }
 
     private void sortListFoodItems(ArrayList<Food> listToOrder) {
-        for (String valueCategory : Helper.SUBCATEGORIES_VOICES_DB) {
+        for (String valueCategory : SUBCATEGORIES_VOICES_DB) {
             for(Food item: listToOrder) {
                 if(item.getSubcategory().equals(valueCategory)) {
                     item.setSubcategoryTranslation(getTranslationSubcategory(item.getSubcategory()));
@@ -293,7 +297,9 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
     }
 
     private void insertUpdateMealGoogleCalendar() {
-        final String allFoodItemsStringCalendarEvent = Helper.getStringListLunchDinnerItemsForDB(listFoodItemsLunchDinner, lunchOrDinner, AddLunchDinner.this);
+        final String allFoodItemsStringCalendarEvent = Helper.getStringListLunchDinnerItemsForDB(
+                SUBCATEGORIES_VOICES_DB, listFoodItemsLunchDinner, lunchOrDinner, AddLunchDinner.this
+        );
 
         if(timeEvent.isTimeEventDefined() && listFoodItemsLunchDinner.size() > 0) {
             new Thread(new Runnable() {
@@ -371,16 +377,15 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == helper.getCameraPermissionCode(AddLunchDinner.this)) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                helper.displayWithToast(AddLunchDinner.this, "Now you can take pictures!");
+                helper.displayWithToast(AddLunchDinner.this, getString(R.string.success_can_take_picture));
             } else {
-                helper.displayWithToast(AddLunchDinner.this, "Cannot to take or save pictures");
+                helper.displayWithToast(AddLunchDinner.this, getString(R.string.error_cannot_take_picture));
             }
         } else if (requestCode == helper.getStoragePermissionCode(AddLunchDinner.this)) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 handlePictureFromCamera.setPreviewImage(uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this, AddLunchDinner.this);
-                helper.displayWithToast(AddLunchDinner.this, "Take your picture again, please.");
             } else {
-                helper.displayWithToast(AddLunchDinner.this, "Cannot to take or save pictures");
+                helper.displayWithToast(AddLunchDinner.this, getString(R.string.error_cannot_save_picture));
             }
         }
     }

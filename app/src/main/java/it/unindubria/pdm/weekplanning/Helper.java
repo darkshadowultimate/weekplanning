@@ -24,7 +24,14 @@ import java.util.ArrayList;
 
 public class Helper extends AppCompatActivity {
 
-    public static final String[] SUBCATEGORIES_VOICES_DB = { "before", "first", "second", "after" };
+    public static String[] getSUBCATEGORIES_VOICES_DB(Context context) {
+        return new String[] {
+            context.getString(R.string.constant_before),
+            context.getString(R.string.constant_first),
+            context.getString(R.string.constant_second),
+            context.getString(R.string.constant_after)
+        };
+    }
 
     public Intent changeActivity(Context context, Class classToLoad) {
         Intent intent = new Intent(context, classToLoad);
@@ -78,7 +85,12 @@ public class Helper extends AppCompatActivity {
         return arrayListItems;
     }
 
-    public static String getStringListLunchDinnerItemsForDB(ArrayList<Food> foodItems, String lunchOrDinner, Context context) {
+    public static String getStringListLunchDinnerItemsForDB(
+        String[] SUBCATEGORIES_VOICES_DB,
+        ArrayList<Food> foodItems,
+        String lunchOrDinner,
+        Context context
+    ) {
         String allItems = "";
 
         for (String subcategory : SUBCATEGORIES_VOICES_DB) {
