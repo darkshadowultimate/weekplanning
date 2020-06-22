@@ -197,6 +197,38 @@ public class Helper extends AppCompatActivity {
         return year + "-" + (month < 10 ? "0" : "") + month + "-" + (day < 10 ? "0" : "") + day;
     }
 
+    public static int compareDate(String date1, String date2) {
+        String[] date1Split = date1.split("-");
+        String[] date2Split = date2.split("-");
+
+        int yearDate1 = Integer.parseInt(date1Split[0]);
+        int monthDate1 = Integer.parseInt(date1Split[1]);
+        int dayDate1 = Integer.parseInt(date1Split[2]);
+        int yearDate2 = Integer.parseInt(date2Split[0]);
+        int monthDate2 = Integer.parseInt(date2Split[1]);
+        int dayDate2 = Integer.parseInt(date2Split[2]);
+
+        if(yearDate1 > yearDate2) {
+            return 1;
+        } else if(yearDate1 == yearDate2) {
+            if(monthDate1 > monthDate2) {
+                return 1;
+            } else if(monthDate1 == monthDate2) {
+                if(dayDate1 > dayDate2) {
+                    return 1;
+                } else if(dayDate1 == dayDate2) {
+                    return 0;
+                } else {
+                    return -1;
+                }
+            } else {
+                return -1;
+            }
+        } else {
+            return -1;
+        }
+    }
+
     public int getCameraPermissionCode(Context context) {
         return Integer.parseInt(context.getString(R.string.constant_permission_code_camera));
     }

@@ -76,4 +76,6 @@
     <string name="button_delete_meal">Elimina pasto</string>
     <string name="warning_delete_card_meal_immediatly_title">Elimina pasto</string>
     <string name="warning_delete_card_meal_immediatly_message">Vuoi veramente eliminare questo pasto?</string>
+    <string name="error_time_event_end_near_title">Tempo fine pasto vicino</string>
+    <string name="error_time_event_end_near_message">Ti servono almeno 20 minuti mangiare con calma!</string>
 </resources>

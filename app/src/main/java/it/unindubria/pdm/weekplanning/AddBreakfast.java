@@ -371,30 +371,39 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
         if(timeEvent.isTimeEventDefined()) {
             // startTime must be less than endTime
             if(timeEvent.isTimeStartLessThanTimeEnd()) {
-                Helper.addAllFoodItemsToDBWhichWereAdded(localDB, listFoodItemsNew);
-                Helper.deleteAllFoodItemsFromDBWhichWereRemoved(localDB, listFoodItemsToDelete);
-                // if there are no meal's items,
-                // than delete the google calendar's event and the meal's picture (if they exist)
-                // otherwise update the SQLite DB and the google calendar's event
-                if(listFoodItems.size() == 0) {
-                    // delete the image
-                    handlePictureFromCamera.handleDeleteImage(false, uid, dateSelected, getString(R.string.constant_breakfast), previewImage, AddBreakfast.this);
-                    // delete the google calendar's event
-                    Helper.deleteGoogleCalendarEvent(
-                        service,
-                        localDB,
-                        googleCalendarEvent,
-                        weekPlanningCalendarId,
-                        idGoogleCalendarEvent,
-                        dateSelected,
-                        getString(R.string.constant_breakfast)
-                    );
+                if(listFoodItems.size() == 0 || timeEvent.isTimeEventEndInTheFuture(dateSelected)) {
+                    Helper.addAllFoodItemsToDBWhichWereAdded(localDB, listFoodItemsNew);
+                    Helper.deleteAllFoodItemsFromDBWhichWereRemoved(localDB, listFoodItemsToDelete);
+                    // if there are no meal's items,
+                    // than delete the google calendar's event and the meal's picture (if they exist)
+                    // otherwise update the SQLite DB and the google calendar's event
+                    if(listFoodItems.size() == 0) {
+                        // delete the image
+                        handlePictureFromCamera.handleDeleteImage(false, uid, dateSelected, getString(R.string.constant_breakfast), previewImage, AddBreakfast.this);
+                        // delete the google calendar's event
+                        Helper.deleteGoogleCalendarEvent(
+                            service,
+                            localDB,
+                            googleCalendarEvent,
+                            weekPlanningCalendarId,
+                            idGoogleCalendarEvent,
+                            dateSelected,
+                            getString(R.string.constant_breakfast)
+                        );
+                    } else {
+                        // insert or update a google calendar's event
+                        insertUpdateMealGoogleCalendar();
+                    }
+                    // set the result of the activityForResult and terminate the activity
+                    finishActivity();
                 } else {
-                    // insert or update a google calendar's event
-                    insertUpdateMealGoogleCalendar();
+                    Log.e("ERROR END_TIME IS NEAR TO THE END OR FINISHED =======> ", timeEvent.getTimeEnd());
+                    helper.displayWithDialog(
+                        AddBreakfast.this,
+                        getString(R.string.error_time_event_end_near_title),
+                        getString(R.string.error_time_event_end_near_message)
+                    );
                 }
-                // set the result of the activityForResult and terminate the activity
-                finishActivity();
             } else {
                 // warn the user than the startTime must be less than endTime
                 helper.displayWithDialog(

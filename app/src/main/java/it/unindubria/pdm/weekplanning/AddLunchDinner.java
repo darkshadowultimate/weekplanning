@@ -459,28 +459,37 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
                 // if there are no meal's items,
                 // than delete the google calendar's event and the meal's picture (if they exist)
                 // otherwise update the SQLite DB and the google calendar's event
-                if(listFoodItemsLunchDinner.size() == 0) {
-                    Log.e("deleteGoogleCalendarEvent", "CALL FUNCTION TO DELETE");
-                    updateLocalDB();
-                    // delete the image
-                    handlePictureFromCamera.handleDeleteImage(false, uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this);
-                    // delete the google calendar's event
-                    Helper.deleteGoogleCalendarEvent(
-                            service,
-                            localDB,
-                            googleCalendarEvent,
-                            weekPlanningCalendarId,
-                            idGoogleCalendarEvent,
-                            dateSelected,
-                            lunchOrDinner
-                    );
+                if(listFoodItemsLunchDinner.size() == 0 || timeEvent.isTimeEventEndInTheFuture(dateSelected)) {
+                    if(listFoodItemsLunchDinner.size() == 0) {
+                        Log.e("deleteGoogleCalendarEvent", "CALL FUNCTION TO DELETE");
+                        updateLocalDB();
+                        // delete the image
+                        handlePictureFromCamera.handleDeleteImage(false, uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this);
+                        // delete the google calendar's event
+                        Helper.deleteGoogleCalendarEvent(
+                                service,
+                                localDB,
+                                googleCalendarEvent,
+                                weekPlanningCalendarId,
+                                idGoogleCalendarEvent,
+                                dateSelected,
+                                lunchOrDinner
+                        );
+                    } else {
+                        Log.e("insertUpdateMealGoogleCalendar", "CALL FUNCTION TO INSERT OR UPDATE");
+                        // insert or update a google calendar's event
+                        insertUpdateMealGoogleCalendar();
+                    }
+                    // set the result of the activityForResult and terminate the activity
+                    finishActivity();
                 } else {
-                    Log.e("insertUpdateMealGoogleCalendar", "CALL FUNCTION TO INSERT OR UPDATE");
-                    // insert or update a google calendar's event
-                    insertUpdateMealGoogleCalendar();
+                    Log.e("ERROR END_TIME IS NEAR TO THE END OR FINISHED =======> ", timeEvent.getTimeEnd());
+                    helper.displayWithDialog(
+                            AddLunchDinner.this,
+                            getString(R.string.error_time_event_end_near_title),
+                            getString(R.string.error_time_event_end_near_message)
+                    );
                 }
-                // set the result of the activityForResult and terminate the activity
-                finishActivity();
             } else {
                 Log.e("ERROR START_TIME > END_TIME =======> ", timeEvent.getTimeStart() + " ---- " + timeEvent.getTimeEnd());
                 // warn the user than the startTime must be less than endTime

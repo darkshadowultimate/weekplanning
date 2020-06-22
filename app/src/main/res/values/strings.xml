@@ -51,6 +51,10 @@
     </string>
     <string name="error_cannot_take_picture">You can\'t take pictures</string>
     <string name="error_cannot_save_picture">You can\'t save pictures</string>
+    <string name="error_time_event_end_near_title">Time end meal near</string>
+    <string name="error_time_event_end_near_message">
+        You need at least 20 minutes to eat your meal!
+    </string>
     <string name="ok" translatable="false">OK</string>
 
     <!-- Success messages -->
