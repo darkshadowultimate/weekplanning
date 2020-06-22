@@ -276,19 +276,21 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
-        switch(view.getId()) {
-            case R.id.single_card_breakfast:
-            case R.id.mainactivity_add_breakfast_button:
-                startActivityForResultMeal(getString(R.string.constant_breakfast));
-                break;
-            case R.id.single_card_lunch:
-            case R.id.mainactivity_add_lunch_button:
-                startActivityForResultMeal(getString(R.string.constant_lunch));
-                break;
-            case R.id.single_card_dinner:
-            case R.id.mainactivity_add_dinner_button:
-                startActivityForResultMeal(getString(R.string.constant_dinner));
-                break;
+        if(GoogleAPIHelper.isDeviceOnline(MainActivity.this)) {
+            switch(view.getId()) {
+                case R.id.single_card_breakfast:
+                case R.id.mainactivity_add_breakfast_button:
+                    startActivityForResultMeal(getString(R.string.constant_breakfast));
+                    break;
+                case R.id.single_card_lunch:
+                case R.id.mainactivity_add_lunch_button:
+                    startActivityForResultMeal(getString(R.string.constant_lunch));
+                    break;
+                case R.id.single_card_dinner:
+                case R.id.mainactivity_add_dinner_button:
+                    startActivityForResultMeal(getString(R.string.constant_dinner));
+                    break;
+            }
         }
     }
 

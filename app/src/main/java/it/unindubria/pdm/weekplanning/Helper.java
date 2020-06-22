@@ -108,7 +108,6 @@ public class Helper extends AppCompatActivity {
         return false;
     }
 
-
     public void setTimeWithTimePicker(
             Context context,
             final TimeEvent timeEvent,
@@ -148,7 +147,6 @@ public class Helper extends AppCompatActivity {
 
         timePickerDialog.show();
     }
-
 
     public void createDirectoryStructure(String uid, String date, String category) {
         String

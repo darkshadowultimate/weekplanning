@@ -160,7 +160,7 @@ public class DBAdapter {
                 String subcategory = cursor.getString(4);
                 String _userId = cursor.getString(5);
 
-                listFoodItemsSection.add(0, new Food(id, name, consumationDate, categoryText, subcategory, _userId));
+                listFoodItemsSection.add(new Food(id, name, consumationDate, categoryText, subcategory, _userId));
             } while (cursor.moveToNext());
         }
 

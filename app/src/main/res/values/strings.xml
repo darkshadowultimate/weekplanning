@@ -36,6 +36,14 @@
     <string name="error_unable_retrieve_permissions">
         Unable to retrieve permissions
     </string>
+    <string name="error_google_play_services_unavailable_title">Cannot use the app</string>
+    <string name="error_google_play_services_unavailable_message">
+        This app needs Google Play Services to works.
+    </string>
+    <string name="error_no_network_title">No network signal</string>
+    <string name="error_no_network_message">
+        Activate your network to use this app.
+    </string>
     <string name="ok" translatable="false">OK</string>
 
     <!-- Success messages -->

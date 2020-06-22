@@ -169,33 +169,35 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onClick(View view) {
-        switch(view.getId()) {
-            case R.id.add_item_meal:
-                if(listFoodItemsLunchDinner.size() < 20) {
-                    addFoodItem();
-                } else {
-                    helper.displayWithDialog(
-                        AddLunchDinner.this,
-                        R.string.no_more_items_title,
-                        R.string.no_more_items_message
-                    );
-                }
-                break;
-            case R.id.preview_image_meal:
-                handlePictureFromCamera.handleDeleteImage(true, uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this);
-                break;
-            case R.id.time_picker_start:
-                setTimeSelected(true);
-                break;
-            case R.id.time_picker_end:
-                setTimeSelected(false);
-                break;
-            case R.id.take_picture_button:
-                takePictureFromCamera();
-                break;
-            case R.id.finish_button:
-                finishActivityAndGoBack();
-                break;
+        if(GoogleAPIHelper.isDeviceOnline(AddLunchDinner.this)) {
+            switch(view.getId()) {
+                case R.id.add_item_meal:
+                    if(listFoodItemsLunchDinner.size() < 20) {
+                        addFoodItem();
+                    } else {
+                        helper.displayWithDialog(
+                            AddLunchDinner.this,
+                            R.string.no_more_items_title,
+                            R.string.no_more_items_message
+                        );
+                    }
+                    break;
+                case R.id.preview_image_meal:
+                    handlePictureFromCamera.handleDeleteImage(true, uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this);
+                    break;
+                case R.id.time_picker_start:
+                    setTimeSelected(true);
+                    break;
+                case R.id.time_picker_end:
+                    setTimeSelected(false);
+                    break;
+                case R.id.take_picture_button:
+                    takePictureFromCamera();
+                    break;
+                case R.id.finish_button:
+                    finishActivityAndGoBack();
+                    break;
+            }
         }
     }
 

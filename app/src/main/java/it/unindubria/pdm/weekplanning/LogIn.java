@@ -45,20 +45,35 @@ public class LogIn extends AppCompatActivity implements View.OnClickListener {
 
         //getApplicationContext().deleteDatabase(DBContract.DB_NAME);
 
-        if(mAuth.getCurrentUser() != null) {
-            startActivity(helper.changeActivity(this, MainActivity.class));
-        }
-
         loginButton = findViewById(R.id.login_button);
 
-        loginButton.setOnClickListener(this);
+        if(GoogleAPIHelper.isGooglePlayServicesAvailable(LogIn.this)) {
+            if(mAuth.getCurrentUser() != null) {
+                startActivity(helper.changeActivity(this, MainActivity.class));
+            }
+            loginButton.setOnClickListener(this);
+        } else {
+            helper.displayWithDialog(
+                LogIn.this,
+                getString(R.string.error_google_play_services_unavailable_title),
+                getString(R.string.error_google_play_services_unavailable_message)
+            );
+            new android.os.Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    finish();
+                }
+            }, 5000);
+        }
     }
 
     @Override
     public void onClick(View view) {
-        if(view.getId() == R.id.login_button) {
-            // login
-            login();
+        if(GoogleAPIHelper.isDeviceOnline(LogIn.this)) {
+            if(view.getId() == R.id.login_button) {
+                // login
+                login();
+            }
         }
     }
 

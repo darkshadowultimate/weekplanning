@@ -15,7 +15,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.TimePicker;
 
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
 import com.google.firebase.auth.FirebaseAuth;
@@ -23,7 +22,6 @@ import com.google.firebase.auth.FirebaseUser;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Calendar;
 
 public class AddBreakfast extends AppCompatActivity implements View.OnClickListener {
     // Firebase
@@ -131,7 +129,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
             Log.e("CHECK CLASS", "googleCalendarEvent IS ABSOLUTELY NULL");
         }
 
-        handlePictureFromCamera.setPreviewImage(uid, dateSelected, "breakfast", previewImage, AddBreakfast.this, AddBreakfast.this);
+        handlePictureFromCamera.setPreviewImage(uid, dateSelected, getString(R.string.constant_breakfast), previewImage, AddBreakfast.this, AddBreakfast.this);
 
         // setting up listview and adapter
         listFoodItems = new ArrayList<Food>();
@@ -146,32 +144,34 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
-        switch(view.getId()) {
-            case R.id.add_item_meal:
-                if(listFoodItems.size() < 10) {
-                    addFoodItem();
-                } else {
-                    helper.displayWithDialog(
-                        AddBreakfast.this,
-                        R.string.no_more_items_title,
-                        R.string.no_more_items_message
-                    );
-                }
-                break;
-            case R.id.preview_image_meal:
-                handlePictureFromCamera.handleDeleteImage(true, uid, dateSelected, "breakfast", previewImage, AddBreakfast.this);
-                break;
-            case R.id.time_picker_start:
-                setTimeSelected(true);
-                break;
-            case R.id.time_picker_end:
-                setTimeSelected(false);
-                break;
-            case R.id.take_picture_button:
-                takePictureFromCamera();
-                break;
-            case R.id.finish_button:
-                finishActivityAndGoBack();
+        if(GoogleAPIHelper.isDeviceOnline(AddBreakfast.this)) {
+            switch(view.getId()) {
+                case R.id.add_item_meal:
+                    if(listFoodItems.size() < 10) {
+                        addFoodItem();
+                    } else {
+                        helper.displayWithDialog(
+                                AddBreakfast.this,
+                                R.string.no_more_items_title,
+                                R.string.no_more_items_message
+                        );
+                    }
+                    break;
+                case R.id.preview_image_meal:
+                    handlePictureFromCamera.handleDeleteImage(true, uid, dateSelected, getString(R.string.constant_breakfast), previewImage, AddBreakfast.this);
+                    break;
+                case R.id.time_picker_start:
+                    setTimeSelected(true);
+                    break;
+                case R.id.time_picker_end:
+                    setTimeSelected(false);
+                    break;
+                case R.id.take_picture_button:
+                    takePictureFromCamera();
+                    break;
+                case R.id.finish_button:
+                    finishActivityAndGoBack();
+            }
         }
     }
 
@@ -261,10 +261,10 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
         String nameFoodItem = editTextFood.getText().toString();
 
         if(!nameFoodItem.isEmpty() && helper.isThereAtLeastACharacter(nameFoodItem)) {
-            Food food = new Food(nameFoodItem, dateSelected, "breakfast", uid);
+            Food food = new Food(nameFoodItem, dateSelected, getString(R.string.constant_breakfast), uid);
 
             listFoodItemsNew.add(food);
-            listFoodItems.add(0, food);
+            listFoodItems.add(food);
             adapter.notifyDataSetChanged();
 
             editTextFood.setText("");
@@ -274,7 +274,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
     }
 
     private void takePictureFromCamera() {
-        Intent cameraIntent = handlePictureFromCamera.takePicture(uid, dateSelected, "breakfast", AddBreakfast.this, AddBreakfast.this);
+        Intent cameraIntent = handlePictureFromCamera.takePicture(uid, dateSelected, getString(R.string.constant_breakfast), AddBreakfast.this, AddBreakfast.this);
 
         if(cameraIntent != null && cameraIntent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(cameraIntent, helper.getTakePictureCodeStartActivity(AddBreakfast.this));
@@ -283,7 +283,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
 
     private void synchronizeListFoodItemsWithLocalDB() {
         ArrayList<Food> loadedFoodItems = localDB
-            .getAllFoodItemsSection(uid, dateSelected, "breakfast");
+            .getAllFoodItemsSection(uid, dateSelected, getString(R.string.constant_breakfast));
 
         for(Food item: loadedFoodItems) {
             listFoodItems.add(0, item);
@@ -303,7 +303,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
             }
         } else if (requestCode == helper.getStoragePermissionCode(AddBreakfast.this)) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                handlePictureFromCamera.setPreviewImage(uid, dateSelected, "breakfast", previewImage, AddBreakfast.this, AddBreakfast.this);
+                handlePictureFromCamera.setPreviewImage(uid, dateSelected, getString(R.string.constant_breakfast), previewImage, AddBreakfast.this, AddBreakfast.this);
                 helper.displayWithToast(AddBreakfast.this, "Take your picture again, please.");
             } else {
                 helper.displayWithToast(AddBreakfast.this, "Cannot to take or save pictures");
@@ -316,7 +316,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == helper.getTakePictureCodeStartActivity(AddBreakfast.this) && resultCode == RESULT_OK) {
-            handlePictureFromCamera.setPreviewImage(uid, dateSelected, "breakfast", previewImage, AddBreakfast.this, AddBreakfast.this);
+            handlePictureFromCamera.setPreviewImage(uid, dateSelected, getString(R.string.constant_breakfast), previewImage, AddBreakfast.this, AddBreakfast.this);
         } else if(requestCode == helper.getGoogleCalendarCodeStartActivity(AddBreakfast.this) && resultCode == RESULT_OK) {
             insertUpdateMealGoogleCalendar();
         }

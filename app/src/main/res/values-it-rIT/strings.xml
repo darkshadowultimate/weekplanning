@@ -66,4 +66,8 @@
         <item>Fine pasto</item>
     </string-array>
     <string name="warning_remove_list_item_element_title">Rimozione elemento</string>
+    <string name="error_google_play_services_unavailable_title">L\'app non funzionerà</string>
+    <string name="error_google_play_services_unavailable_message">Per utilizzare l\'app installare Google Play Services.</string>
+    <string name="error_no_network_title">Internet non attivo</string>
+    <string name="error_no_network_message">Connettiti ad Internet per utilizzare l\'app</string>
 </resources>

@@ -40,14 +40,21 @@ public class GoogleAPIHelper {
      *
      * @return true if the device has a network connection, false otherwise.
      */
-    /*
-        public boolean isDeviceOnline() {
-            ConnectivityManager connMgr =
-                    (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
-            return (networkInfo != null && networkInfo.isConnected());
+    public static boolean isDeviceOnline(Context context) {
+        ConnectivityManager connMgr =
+                (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if(!(networkInfo != null && networkInfo.isConnected())) {
+            new Helper().displayWithDialog(
+                context,
+                context.getString(R.string.error_no_network_title),
+                context.getString(R.string.error_no_network_message)
+            );
+            return false;
+        } else {
+            return true;
         }
-    */
+    }
 
     /**
      * Check that Google Play services APK is installed and up to date. Will
@@ -57,7 +64,7 @@ public class GoogleAPIHelper {
      * @return true if Google Play Services is available and up to
      * date on this device; false otherwise.
      */
-    public boolean isGooglePlayServicesAvailable(Activity activity) {
+    public static boolean isGooglePlayServicesAvailable(Activity activity) {
         GoogleApiAvailability gApi = GoogleApiAvailability.getInstance();
         int resultCode = gApi.isGooglePlayServicesAvailable(activity);
         if (resultCode != ConnectionResult.SUCCESS) {
