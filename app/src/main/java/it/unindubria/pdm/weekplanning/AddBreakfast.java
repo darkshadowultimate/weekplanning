@@ -434,6 +434,12 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onBackPressed() {
-        finishActivity();
+        Helper.handleBackButtonAddMeal(
+            AddBreakfast.this,
+            AddBreakfast.this,
+            listFoodItemsToDelete.size(),
+            listFoodItemsNew.size(),
+            timeEvent
+        );
     }
 }

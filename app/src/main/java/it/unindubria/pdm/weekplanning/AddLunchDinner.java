@@ -527,7 +527,12 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onBackPressed() {
-        setResult(Activity.RESULT_OK, new Intent());
-        finish();
+        Helper.handleBackButtonAddMeal(
+            AddLunchDinner.this,
+            AddLunchDinner.this,
+            listFoodItemsToDelete.size(),
+            listFoodItemsNew.size(),
+            timeEvent
+        );
     }
 }

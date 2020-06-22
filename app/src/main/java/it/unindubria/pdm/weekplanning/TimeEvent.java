@@ -11,10 +11,12 @@ class TimeEvent {
     private int minutesTimeStart;
     private int hoursTimeEnd;
     private int minutesTimeEnd;
+    private boolean timeChanged;
 
     public TimeEvent() {
         this.timeStart = null;
         this.timeEnd = null;
+        this.timeChanged = false;
     }
 
     public TimeEvent(String timeStart, String timeEnd) {
@@ -25,6 +27,8 @@ class TimeEvent {
         this.minutesTimeStart = getMinutesFromTimeString(timeStart);
         this.hoursTimeEnd = getHoursFromTimeString(timeEnd);
         this.minutesTimeEnd = getMinutesFromTimeString(timeEnd);
+
+        this.timeChanged = false;
     }
 
     public String getTimeStart() {
@@ -67,12 +71,18 @@ class TimeEvent {
         this.hoursTimeStart = hours;
         this.minutesTimeStart = minutes;
         this.timeStart = getTimeAsString(hours, minutes);
+        this.timeChanged = true;
     }
 
     public void setTimeEnd(int hours, int minutes) {
         this.hoursTimeEnd = hours;
         this.minutesTimeEnd = minutes;
         this.timeEnd = getTimeAsString(hours, minutes);
+        this.timeChanged = true;
+    }
+
+    public boolean didTimeChanged() {
+        return this.timeChanged;
     }
 
     public boolean isStartTimeDefined() {

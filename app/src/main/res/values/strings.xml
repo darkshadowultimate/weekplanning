@@ -85,6 +85,11 @@
     <string name="warning_delete_card_meal_immediatly_message">
         Do you really wanna delete this meal?
     </string>
+    <string name="warning_on_back_button_changes_title">Changes made</string>
+    <string name="warning_on_back_button_changes_message">
+        Some changes were made.
+        \nDo you really wanna go back?
+    </string>
 
     <!-- Buttons -->
     <string name="button_add_breakfast">Add breakfast</string>

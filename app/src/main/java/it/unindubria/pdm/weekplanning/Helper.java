@@ -259,6 +259,33 @@ public class Helper extends AppCompatActivity {
         }
     }
 
+    public static void handleBackButtonAddMeal(
+        Context context,
+        final Activity activity,
+        int sizeItemsToDeleteArrayList,
+        int sizeNewItemsArrayList,
+        TimeEvent timeEvent
+    ) {
+        if(sizeNewItemsArrayList == 0 && sizeItemsToDeleteArrayList == 0 && !timeEvent.didTimeChanged()) {
+            activity.setResult(Activity.RESULT_OK, new Intent());
+            activity.finish();
+        } else {
+            new AlertDialog
+                .Builder(context)
+                .setTitle(context.getString(R.string.warning_on_back_button_changes_title))
+                .setMessage(context.getString(R.string.warning_on_back_button_changes_message))
+                .setPositiveButton(context.getString(R.string.button_yes), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                    activity.setResult(Activity.RESULT_OK, new Intent());
+                    activity.finish();
+                    }
+                })
+                .setNegativeButton(context.getString(R.string.button_no), null)
+                .show();
+        }
+    }
+
     public static void handleRemoveListViewItem(
             Context context,
             final ArrayList<Food> generalArrayList,
