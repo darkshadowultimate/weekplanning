@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -63,6 +64,8 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_breakfast);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.custom_toolbar);
+
         // setting up Firebase
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
@@ -100,8 +103,10 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
         // getting data from intent
         Intent mainActivityIntent = getIntent();
         // saving the date choosen by the user already formatted
-        dateSelected = mainActivityIntent.getStringExtra("dateString");
-        weekPlanningCalendarId = mainActivityIntent.getStringExtra("calendarId");
+        dateSelected = mainActivityIntent.getStringExtra(getString(R.string.constant_intent_dateString));
+        weekPlanningCalendarId = mainActivityIntent.getStringExtra(getString(R.string.constant_intent_calendarId));
+
+        toolbar.setTitle(dateSelected + " / " + getString(R.string.section_meal_breakfast));
 
         // open connection to local SQLite database
         localDB = DBAdapter.getInstance(AddBreakfast.this);

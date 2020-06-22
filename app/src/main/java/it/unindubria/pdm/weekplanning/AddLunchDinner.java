@@ -7,6 +7,7 @@ import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
@@ -75,6 +76,8 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_lunch_dinner);
 
+        Toolbar toolbar = (Toolbar) findViewById(R.id.custom_toolbar);
+
         // setting up Firebase
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
@@ -125,6 +128,12 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         dateSelected = mainActivityIntent.getStringExtra(getString(R.string.constant_intent_dateString));
         lunchOrDinner = mainActivityIntent.getStringExtra(getString(R.string.constant_intent_lunchOrDinner));
         weekPlanningCalendarId = mainActivityIntent.getStringExtra(getString(R.string.constant_intent_calendarId));
+
+        toolbar.setTitle(dateSelected + " / " + getString(getResources().getIdentifier(
+            "section_meal_" + lunchOrDinner,
+            "string",
+            getPackageName()
+        )));
 
         summaryGoogleCalendarEvent = getString(
             getResources().getIdentifier(
