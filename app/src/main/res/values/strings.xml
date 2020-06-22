@@ -75,6 +75,12 @@
         If you remove this element, your meal will be removed, too.
         \nDo you want to proceed?
     </string>
+    <string name="warning_delete_card_meal_immediatly_title">
+        Delete the meal
+    </string>
+    <string name="warning_delete_card_meal_immediatly_message">
+        Do you really wanna delete this meal?
+    </string>
 
     <!-- Buttons -->
     <string name="button_add_breakfast">Add breakfast</string>
@@ -84,6 +90,7 @@
     <string name="button_time_picker_start">Time start</string>
     <string name="button_time_picker_end">Time end</string>
     <string name="button_take_picture">Take picture</string>
+    <string name="button_delete_meal">Delete meal</string>
     <string name="button_done">Done</string>
     <string name="button_negate">Negate</string>
     <string name="button_allow">Allow</string>

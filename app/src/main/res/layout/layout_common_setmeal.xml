@@ -64,27 +64,27 @@
             android:id="@+id/time_picker_start"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginRight="10dp"
+            android:layout_weight="1"
             android:background="@drawable/custom_button"
             android:fontFamily="@font/quicksand_bold"
             android:text="@string/button_time_picker_start"
-            android:textColor="@color/textColorCustomButton"
             android:textAllCaps="false"
-            android:textSize="18sp" />
+            android:textColor="@color/customButton"
+            android:textSize="22dp" />
 
         <Button
             android:id="@+id/time_picker_end"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
             android:layout_marginLeft="10dp"
+            android:layout_weight="1"
             android:background="@drawable/custom_button"
             android:fontFamily="@font/quicksand_bold"
             android:text="@string/button_time_picker_end"
-            android:textColor="@color/textColorCustomButton"
             android:textAllCaps="false"
-            android:textSize="18sp" />
+            android:textColor="@color/customButton"
+            android:textSize="22dp" />
     </LinearLayout>
 
     <Button
@@ -93,23 +93,45 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="20dp"
+        android:layout_weight="1"
         android:background="@drawable/custom_button"
         android:fontFamily="@font/quicksand_bold"
         android:text="@string/button_take_picture"
         android:textAllCaps="false"
-        android:textColor="@color/textColorCustomButton"
-        android:textSize="18sp" />
+        android:textColor="@color/customButton"
+        android:textSize="22sp" />
 
-    <Button
-        android:id="@+id/finish_button"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="20dp"
-        android:background="@drawable/custom_button"
-        android:fontFamily="@font/quicksand_bold"
-        android:text="@string/button_done"
-        android:textAllCaps="false"
-        android:textColor="@color/textColorCustomButton"
-        android:textSize="18sp" />
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/delete_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginRight="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/delete_button"
+            android:fontFamily="@font/quicksand_bold"
+            android:text="@string/button_delete_meal"
+            android:textAllCaps="false"
+            android:textColor="@color/textColorCustomButton"
+            android:textSize="20sp" />
+
+        <Button
+            android:id="@+id/finish_button"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="10dp"
+            android:layout_weight="1"
+            android:background="@drawable/done_button"
+            android:fontFamily="@font/quicksand_bold"
+            android:text="@string/button_done"
+            android:textAllCaps="false"
+            android:textColor="@color/textColorCustomButton"
+            android:textSize="20sp" />
+    </LinearLayout>
 </LinearLayout>

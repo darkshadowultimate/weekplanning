@@ -1,5 +1,6 @@
 package it.unindubria.pdm.weekplanning;
 
+import android.app.Activity;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -11,12 +12,14 @@ import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
 import com.google.api.services.calendar.Calendar;
 
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -291,6 +294,69 @@ public class Helper extends AppCompatActivity {
                 }
             }
         }).start();
+    }
+
+    public static void deleteMealCardImmediatly(
+        final Activity activity,
+        final Context context,
+        final DBAdapter localDB,
+        final Calendar service,
+        final ImageView previewImage,
+        final String typeOfMeal,
+        final String dateSelected,
+        final String uid,
+        final String weekPlanningCalendarId,
+        final String idGoogleCalendarEvent,
+        final int sizeGeneralArrayList,
+        final int sizeNewItemslArrayList,
+        final int sizeItemsToDeleteArrayList
+    ) {
+        final HandlePictureFromCamera handlePictureFromCamera = new HandlePictureFromCamera();
+
+        new AlertDialog
+            .Builder(context)
+            .setTitle(context.getString(R.string.warning_delete_card_meal_immediatly_title))
+            .setMessage(context.getString(R.string.warning_delete_card_meal_immediatly_message))
+            .setPositiveButton(context.getString(R.string.button_yes), new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    if(
+                        sizeGeneralArrayList > 0 &&
+                        (sizeGeneralArrayList != sizeNewItemslArrayList && sizeItemsToDeleteArrayList == 0)
+                    ) {
+                        localDB.removeMeal(dateSelected, typeOfMeal);
+                        handlePictureFromCamera.handleDeleteImage(
+                                false,
+                                uid,
+                                dateSelected,
+                                typeOfMeal,
+                                previewImage,
+                                context
+                        );
+                        new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    GoogleCalendarHelper.deleteCalendarEvent(
+                                            service,
+                                            weekPlanningCalendarId,
+                                            idGoogleCalendarEvent
+                                    );
+
+                                    localDB.removeGoogleCalendarEvent(dateSelected, typeOfMeal);
+                                } catch(IOException exc) {
+                                    Log.e("ERROR DELETING EVENT", "EVENT NOT DELETED", exc);
+                                }
+                            }
+                        }).start();
+                    }
+
+                    activity.setResult(Activity.RESULT_OK, new Intent());
+                    activity.finish();
+                }
+            })
+            .setNegativeButton(context.getString(R.string.button_no), null)
+            .show();
     }
 
     public void displayWithDialog(Context context, int title, int message) {

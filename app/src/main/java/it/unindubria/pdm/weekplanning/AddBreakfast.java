@@ -2,9 +2,12 @@ package it.unindubria.pdm.weekplanning;
 
 import android.app.Activity;
 import android.app.TimePickerDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -18,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 
 import com.google.api.client.googleapis.extensions.android.gms.auth.UserRecoverableAuthIOException;
+import com.google.api.services.calendar.Calendar;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -49,6 +53,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
     private Button timePickerStartButton;
     private Button timePickerEndButton;
     private Button takePicture;
+    private Button deleteMealButton;
     private Button saveButton;
     private ImageView previewImage;
     private String dateSelected;
@@ -87,6 +92,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
         timePickerStartButton = findViewById(R.id.time_picker_start);
         timePickerEndButton = findViewById(R.id.time_picker_end);
         takePicture = findViewById(R.id.take_picture_button);
+        deleteMealButton = findViewById(R.id.delete_button);
         saveButton = findViewById(R.id.finish_button);
         previewImage = findViewById(R.id.preview_image_meal);
         listView = findViewById(R.id.list_food_items_meal);
@@ -96,6 +102,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
         timePickerStartButton.setOnClickListener(this);
         timePickerEndButton.setOnClickListener(this);
         takePicture.setOnClickListener(this);
+        deleteMealButton.setOnClickListener(this);
         saveButton.setOnClickListener(this);
         previewImage.setOnClickListener(this);
         handleRemoveListViewItem();
@@ -173,6 +180,23 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
                     break;
                 case R.id.take_picture_button:
                     takePictureFromCamera();
+                    break;
+                case R.id.delete_button:
+                    Helper.deleteMealCardImmediatly(
+                        AddBreakfast.this,
+                        AddBreakfast.this,
+                        localDB,
+                        service,
+                        previewImage,
+                        getString(R.string.constant_breakfast),
+                        dateSelected,
+                        uid,
+                        weekPlanningCalendarId,
+                        idGoogleCalendarEvent,
+                        listFoodItems.size(),
+                        listFoodItemsNew.size(),
+                        listFoodItemsToDelete.size()
+                    );
                     break;
                 case R.id.finish_button:
                     finishActivityAndGoBack();
@@ -370,8 +394,7 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
                     insertUpdateMealGoogleCalendar();
                 }
                 // set the result of the activityForResult and terminate the activity
-                setResult(Activity.RESULT_OK, new Intent());
-                finish();
+                finishActivity();
             } else {
                 // warn the user than the startTime must be less than endTime
                 helper.displayWithDialog(
@@ -391,14 +414,17 @@ public class AddBreakfast extends AppCompatActivity implements View.OnClickListe
         } else {
             // if there are no meal's items and the time is not set,
             // than terminate the activity
-            setResult(Activity.RESULT_OK, new Intent());
-            finish();
+            finishActivity();
         }
+    }
+
+    private void finishActivity() {
+        setResult(Activity.RESULT_OK, new Intent());
+        finish();
     }
 
     @Override
     public void onBackPressed() {
-        setResult(Activity.RESULT_OK, new Intent());
-        finish();
+        finishActivity();
     }
 }

@@ -3,6 +3,7 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <color name="colorWhite">#FFFFFF</color>
     <color name="colorTextToolbar">#FFFFFF</color>
 
     <!-- BackgroundColors -->
@@ -17,6 +18,7 @@
     <color name="customButton">#4D4CEB</color>
     <color name="textColorCustomButton">#FFFFFF</color>
     <color name="colorAddButton">#E7007E</color>
+    <color name="colorDeleteButton">#F61919</color>
 
     <!-- Cards -->
     <color name="colorCardMeal">#5A27B0</color>

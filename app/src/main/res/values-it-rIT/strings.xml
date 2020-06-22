@@ -73,4 +73,7 @@
     <string name="success_can_take_picture">Ora puoi scattare le foto!</string>
     <string name="error_cannot_take_picture">Non puoi scattare foto</string>
     <string name="error_cannot_save_picture">Non puoi salvare le foto</string>
+    <string name="button_delete_meal">Elimina pasto</string>
+    <string name="warning_delete_card_meal_immediatly_title">Elimina pasto</string>
+    <string name="warning_delete_card_meal_immediatly_message">Vuoi veramente eliminare questo pasto?</string>
 </resources>

@@ -61,6 +61,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
     private Button timePickerStartButton;
     private Button timePickerEndButton;
     private Button takePicture;
+    private Button deleteMealButton;
     private Button saveButton;
     private ImageView previewImage;
     private Spinner dropdown_subcategories;
@@ -101,6 +102,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         timePickerStartButton = findViewById(R.id.time_picker_start);
         timePickerEndButton = findViewById(R.id.time_picker_end);
         takePicture = findViewById(R.id.take_picture_button);
+        deleteMealButton = findViewById(R.id.delete_button);
         saveButton = findViewById(R.id.finish_button);
         previewImage = findViewById(R.id.preview_image_meal);
         listViewLunchDinner = findViewById(R.id.list_food_items_meal);
@@ -111,6 +113,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         timePickerStartButton.setOnClickListener(this);
         timePickerEndButton.setOnClickListener(this);
         takePicture.setOnClickListener(this);
+        deleteMealButton.setOnClickListener(this);
         saveButton.setOnClickListener(this);
         previewImage.setOnClickListener(this);
         handleRemoveListViewItem();
@@ -206,6 +209,23 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
                     break;
                 case R.id.take_picture_button:
                     takePictureFromCamera();
+                    break;
+                case R.id.delete_button:
+                    Helper.deleteMealCardImmediatly(
+                        AddLunchDinner.this,
+                        AddLunchDinner.this,
+                        localDB,
+                        service,
+                        previewImage,
+                        lunchOrDinner,
+                        dateSelected,
+                        uid,
+                        weekPlanningCalendarId,
+                        idGoogleCalendarEvent,
+                        listFoodItemsLunchDinner.size(),
+                        listFoodItemsNew.size(),
+                        listFoodItemsToDelete.size()
+                    );
                     break;
                 case R.id.finish_button:
                     finishActivityAndGoBack();
@@ -460,8 +480,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
                     insertUpdateMealGoogleCalendar();
                 }
                 // set the result of the activityForResult and terminate the activity
-                setResult(Activity.RESULT_OK, new Intent());
-                finish();
+                finishActivity();
             } else {
                 Log.e("ERROR START_TIME > END_TIME =======> ", timeEvent.getTimeStart() + " ---- " + timeEvent.getTimeEnd());
                 // warn the user than the startTime must be less than endTime
@@ -488,9 +507,13 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         } else {
             // if there are no meal's items and the time is not set,
             // than terminate the activity
-            setResult(Activity.RESULT_OK, new Intent());
-            finish();
+            finishActivity();
         }
+    }
+
+    private void finishActivity() {
+        setResult(Activity.RESULT_OK, new Intent());
+        finish();
     }
 
     @Override

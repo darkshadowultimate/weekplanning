@@ -225,6 +225,15 @@ public class DBAdapter {
         );
     }
 
+    public void removeMeal(String dateMeal, String categoryMeal) {
+        db.delete(
+            DBContract.FoodItems.FOODS_TABLE,
+            DBContract.FoodItems.FOODS_CONSUMATIONDATE + " = ? AND " +
+            DBContract.FoodItems.FOODS_CATEGORY + " = ?",
+            new String[] { dateMeal, categoryMeal }
+        );
+    }
+
     public void removeGoogleCalendarEvent(String dateEvent, String category) {
         db.delete(
             DBContract.CalendarEvents.CALENDAREVENTS_TABLE,
