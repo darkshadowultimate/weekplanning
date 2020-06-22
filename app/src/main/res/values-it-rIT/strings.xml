@@ -8,7 +8,7 @@
     <string name="insert_empty_item">Questo dato non può essere vuoto!</string>
     <string name="error_time_not_selected_title">Orario pasto non selezionato</string>
     <string name="error_time_not_selected_message">Devi selezionare l\'orario del pasto</string>
-    <string name="error_timestart_less_than_timeend_title">Orario selezionato erra</string>
+    <string name="error_timestart_less_than_timeend_title">Orario selezionato errato</string>
     <string name="error_timestart_less_than_timeend_message">L\'orario iniziale non può essere maggiore di quello finale</string>
     <string name="error_unable_retrieve_permissions">Permessi non concessi</string>
     <string name="login_success">Accesso effettuato</string>
@@ -77,7 +77,7 @@
     <string name="warning_delete_card_meal_immediatly_title">Elimina pasto</string>
     <string name="warning_delete_card_meal_immediatly_message">Vuoi veramente eliminare questo pasto?</string>
     <string name="error_time_event_end_near_title">Tempo fine pasto vicino</string>
-    <string name="error_time_event_end_near_message">Ti servono almeno 20 minuti mangiare con calma!</string>
+    <string name="error_time_event_end_near_message">Ti servono almeno 20 minuti per mangiare con calma!</string>
     <string name="warning_on_back_button_changes_title">Modifiche apportate</string>
     <string name="warning_on_back_button_changes_message">Sono state apportate delle modifiche. Vuoi tornare indietro?</string>
 </resources>

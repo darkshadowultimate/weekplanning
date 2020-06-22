@@ -43,6 +43,7 @@ public class LogIn extends AppCompatActivity implements View.OnClickListener {
                 .getGoogleSignInClient(getString(R.string.default_web_client_id), LogIn.this);
         mAuth = FirebaseAuth.getInstance();
 
+        // for debug and development only
         //getApplicationContext().deleteDatabase(DBContract.DB_NAME);
 
         loginButton = findViewById(R.id.login_button);
