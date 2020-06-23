@@ -123,6 +123,7 @@ public class Helper extends AppCompatActivity {
         return false;
     }
 
+    // select the time (timeStart or timeEnd) using the TimePicker
     public void setTimeWithTimePicker(
             Context context,
             final TimeEvent timeEvent,
@@ -193,6 +194,7 @@ public class Helper extends AppCompatActivity {
         }
     }
 
+    // format yyyy-mm-gg (if a value is less than 10, it must preceded by 0 (zero))
     public String getStringDate(int day, int month, int year) {
         return year + "-" + (month < 10 ? "0" : "") + month + "-" + (day < 10 ? "0" : "") + day;
     }
@@ -253,12 +255,15 @@ public class Helper extends AppCompatActivity {
         return Integer.parseInt(context.getString(R.string.constant_start_activity_code_takePicture));
     }
 
+    // add to the local db all the new items inside the listView that were addded by the user
     public static void addAllFoodItemsToDBWhichWereAdded(DBAdapter localDB, ArrayList<Food> itemsToAdd) {
         for(Food foodItem: itemsToAdd) {
             localDB.insert(foodItem);
         }
     }
 
+    // If the user click the back button on the buttom of the screen but changes were made, then ask him to continue or not.
+    // If no changes were made, than the activity will finish
     public static void handleBackButtonAddMeal(
         Context context,
         final Activity activity,
@@ -321,6 +326,7 @@ public class Helper extends AppCompatActivity {
             .show();
     }
 
+    // delete from the local db all the items inside the listView that were removed by the user
     public static void deleteAllFoodItemsFromDBWhichWereRemoved(DBAdapter localDB, ArrayList<Food> itemsToRemove) {
         for(Food foodItem: itemsToRemove) {
             localDB.removeFoodItem(foodItem.getId());
@@ -355,6 +361,8 @@ public class Helper extends AppCompatActivity {
         }).start();
     }
 
+    // called by delete button inside AddBreakfast.java or AddLunchDinner.java
+    // it deletes all info from the local db about that meal, the picture taken (if it exists) and the Google Calendar Event
     public static void deleteMealCardImmediatly(
         final Activity activity,
         final Context context,

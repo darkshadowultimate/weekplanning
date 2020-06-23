@@ -80,4 +80,7 @@
     <string name="error_time_event_end_near_message">Ti servono almeno 20 minuti per mangiare con calma!</string>
     <string name="warning_on_back_button_changes_title">Modifiche apportate</string>
     <string name="warning_on_back_button_changes_message">Sono state apportate delle modifiche. Vuoi tornare indietro?</string>
+    <string name="error_file_not_created">File non creato</string>
+    <string name="warning_delete_image_title">Cancellazione image</string>
+    <string name="warning_delete_image_message">Vuoi davvero cancellare questa immagine?</string>
 </resources>

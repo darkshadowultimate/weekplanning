@@ -5,12 +5,17 @@ import android.util.Log;
 import java.util.Calendar;
 
 class TimeEvent {
+    // The time which indicates when the Google Calendar event starts (String)
+    // Format => hh:mm:ss
     private String timeStart;
+    // The time which indicates when the Google Calendar event ends (String)
+    // Format => hh:mm:ss
     private String timeEnd;
     private int hoursTimeStart;
     private int minutesTimeStart;
     private int hoursTimeEnd;
     private int minutesTimeEnd;
+    // Indicated if the TimePicker was used to set the time (timeStart, timeEnd or both)
     private boolean timeChanged;
 
     public TimeEvent() {
@@ -56,14 +61,20 @@ class TimeEvent {
     }
 
     private static int getHoursFromTimeString(String timeString) {
+        // timeString format => hh:mm:ss
+        // after split => [hh, mm, ss]
         return Integer.parseInt(timeString.split(":")[0]);
     }
 
     private static int getMinutesFromTimeString(String timeString) {
+        // timeString format => hh:mm:ss
+        // after split => [hh, mm, ss]
         return Integer.parseInt(timeString.split(":")[1]);
     }
 
     private String getTimeAsString(int hours, int minutes) {
+        // convert to hh:mm:ss (seconds always 00)
+        // numbers less than 10 must be preceded by a 0 (zero)
         return (hours < 10 ? "0" : "") + hours + ":" + (minutes < 10 ? "0" : "") + minutes + ":00";
     }
 
@@ -71,6 +82,7 @@ class TimeEvent {
         this.hoursTimeStart = hours;
         this.minutesTimeStart = minutes;
         this.timeStart = getTimeAsString(hours, minutes);
+        // the time was changes
         this.timeChanged = true;
     }
 
@@ -78,6 +90,7 @@ class TimeEvent {
         this.hoursTimeEnd = hours;
         this.minutesTimeEnd = minutes;
         this.timeEnd = getTimeAsString(hours, minutes);
+        // the time was changes
         this.timeChanged = true;
     }
 
@@ -111,6 +124,10 @@ class TimeEvent {
         return false;
     }
 
+    // Used to determine if the timeStart and endTime was selected correctly.
+    // There's has to be at least a difference of 20 minutes between the timeStart and the timeEnd.
+    // There's has to be at least a difference of 20 minutes between the currentTime and the timeEnd (if the event's date is the same of the current one).
+    // If the event's date is in the past, then you cannot insert the event.
     public boolean isTimeEventEndInTheFuture(String dateEvent) {
         Calendar currentTime = Calendar.getInstance();
         // get 24 hours format
@@ -135,6 +152,7 @@ class TimeEvent {
         );
 
         if(dateEventBiggerThanCurrentDate == 1) {
+            // there's no need to check the currentTime too
             return isStartTimeLessThanEndTimeEnough;
         } else if(dateEventBiggerThanCurrentDate == 0) {
             return

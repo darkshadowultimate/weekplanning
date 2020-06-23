@@ -33,11 +33,11 @@
             android:layout_marginBottom="20dp"
             android:layout_marginHorizontal="20dp"
             android:background="@drawable/done_button"
-            android:backgroundTint="@color/colorAddButton"
+            android:backgroundTint="@color/colorAccent"
             android:fontFamily="@font/quicksand_bold"
             android:text="@string/button_add_breakfast"
             android:textAllCaps="false"
-            android:textColor="@color/textColorCustomButton"
+            android:textColor="@color/colorWhite"
             android:textSize="18sp" />
 
         <Button
@@ -47,11 +47,11 @@
             android:layout_marginBottom="20dp"
             android:layout_marginHorizontal="20dp"
             android:background="@drawable/done_button"
-            android:backgroundTint="@color/colorAddButton"
+            android:backgroundTint="@color/colorAccent"
             android:fontFamily="@font/quicksand_bold"
             android:text="@string/button_add_lunch"
             android:textAllCaps="false"
-            android:textColor="@color/textColorCustomButton"
+            android:textColor="@color/colorWhite"
             android:textSize="18sp" />
 
         <Button
@@ -60,11 +60,11 @@
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="20dp"
             android:background="@drawable/done_button"
-            android:backgroundTint="@color/colorAddButton"
+            android:backgroundTint="@color/colorAccent"
             android:fontFamily="@font/quicksand_bold"
             android:text="@string/button_add_dinner"
             android:textAllCaps="false"
-            android:textColor="@color/textColorCustomButton"
+            android:textColor="@color/colorWhite"
             android:textSize="18sp" />
 
         <LinearLayout
@@ -85,7 +85,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/section_meal_breakfast"
-                android:textColor="@color/colorTextViewLight"
+                android:textColor="@color/colorWhite"
                 android:fontFamily="@font/montserrat"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -96,7 +96,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
                 android:layout_marginHorizontal="25dp"
-                android:textColor="@color/colorTextViewLight"
+                android:textColor="@color/colorWhite"
                 android:fontFamily="@font/montserrat"
                 android:text=""
                 android:textSize="12dp" />
@@ -121,7 +121,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/section_meal_lunch"
-                android:textColor="@color/colorTextViewLight"
+                android:textColor="@color/colorWhite"
                 android:fontFamily="@font/montserrat"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -145,7 +145,7 @@
                         android:layout_marginTop="10dp"
                         android:layout_marginHorizontal="10dp"
                         android:text="@string/meal_subcategory_starter"
-                        android:textColor="@color/colorTextViewLight"
+                        android:textColor="@color/colorWhite"
                         android:fontFamily="@font/montserrat"
                         android:textSize="14dp" />
 
@@ -156,7 +156,7 @@
                         android:layout_marginTop="10dp"
                         android:layout_marginHorizontal="25dp"
                         android:text=""
-                        android:textColor="@color/colorTextViewLight"
+                        android:textColor="@color/colorWhite"
                         android:fontFamily="@font/montserrat"
                         android:textSize="12dp" />
                 </LinearLayout>
@@ -175,7 +175,7 @@
                         android:layout_marginTop="10dp"
                         android:layout_marginHorizontal="10dp"
                         android:text="@string/meal_subcategory_first"
-                        android:textColor="@color/colorTextViewLight"
+                        android:textColor="@color/colorWhite"
                         android:fontFamily="@font/montserrat"
                         android:textSize="14dp" />
 
@@ -186,7 +186,7 @@
                         android:layout_marginTop="10dp"
                         android:layout_marginHorizontal="25dp"
                         android:text=""
-                        android:textColor="@color/colorTextViewLight"
+                        android:textColor="@color/colorWhite"
                         android:fontFamily="@font/montserrat"
                         android:textSize="12dp" />
                 </LinearLayout>
@@ -210,7 +210,7 @@
                         android:layout_marginTop="10dp"
                         android:layout_marginHorizontal="10dp"
                         android:text="@string/meal_subcategory_second"
-                        android:textColor="@color/colorTextViewLight"
+                        android:textColor="@color/colorWhite"
                         android:fontFamily="@font/montserrat"
                         android:textSize="14dp" />
 
@@ -221,7 +221,7 @@
                         android:layout_marginTop="10dp"
                         android:layout_marginHorizontal="25dp"
                         android:text=""
-                        android:textColor="@color/colorTextViewLight"
+                        android:textColor="@color/colorWhite"
                         android:fontFamily="@font/montserrat"
                         android:textSize="12dp" />
                 </LinearLayout>
@@ -240,7 +240,7 @@
                         android:layout_marginTop="10dp"
                         android:layout_marginHorizontal="10dp"
                         android:text="@string/meal_subcategory_end"
-                        android:textColor="@color/colorTextViewLight"
+                        android:textColor="@color/colorWhite"
                         android:fontFamily="@font/montserrat"
                         android:textSize="14dp" />
 
@@ -251,7 +251,7 @@
                         android:layout_marginTop="10dp"
                         android:layout_marginHorizontal="25dp"
                         android:text=""
-                        android:textColor="@color/colorTextViewLight"
+                        android:textColor="@color/colorWhite"
                         android:fontFamily="@font/montserrat"
                         android:textSize="12dp" />
                 </LinearLayout>
@@ -276,7 +276,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="@string/section_meal_dinner"
-                android:textColor="@color/colorTextViewLight"
+                android:textColor="@color/colorWhite"
                 android:fontFamily="@font/montserrat"
                 android:textSize="16sp"
                 android:textStyle="bold" />
@@ -299,7 +299,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:layout_marginHorizontal="10dp"
-                        android:textColor="@color/colorTextViewLight"
+                        android:textColor="@color/colorWhite"
                         android:fontFamily="@font/montserrat"
                         android:text="@string/meal_subcategory_starter"
                         android:textSize="14dp" />
@@ -310,7 +310,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:layout_marginHorizontal="25dp"
-                        android:textColor="@color/colorTextViewLight"
+                        android:textColor="@color/colorWhite"
                         android:fontFamily="@font/montserrat"
                         android:text=""
                         android:textSize="12dp" />
@@ -329,7 +329,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:layout_marginHorizontal="10dp"
-                        android:textColor="@color/colorTextViewLight"
+                        android:textColor="@color/colorWhite"
                         android:fontFamily="@font/montserrat"
                         android:text="@string/meal_subcategory_first"
                         android:textSize="14dp" />
@@ -340,7 +340,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:layout_marginHorizontal="25dp"
-                        android:textColor="@color/colorTextViewLight"
+                        android:textColor="@color/colorWhite"
                         android:fontFamily="@font/montserrat"
                         android:text=""
                         android:textSize="12dp" />
@@ -364,7 +364,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:layout_marginHorizontal="10dp"
-                        android:textColor="@color/colorTextViewLight"
+                        android:textColor="@color/colorWhite"
                         android:fontFamily="@font/montserrat"
                         android:text="@string/meal_subcategory_second"
                         android:textSize="14dp" />
@@ -375,7 +375,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:layout_marginHorizontal="25dp"
-                        android:textColor="@color/colorTextViewLight"
+                        android:textColor="@color/colorWhite"
                         android:fontFamily="@font/montserrat"
                         android:text=""
                         android:textSize="12dp" />
@@ -394,7 +394,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:layout_marginHorizontal="10dp"
-                        android:textColor="@color/colorTextViewLight"
+                        android:textColor="@color/colorWhite"
                         android:fontFamily="@font/montserrat"
                         android:text="@string/meal_subcategory_end"
                         android:textSize="14dp" />
@@ -405,7 +405,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="10dp"
                         android:layout_marginHorizontal="25dp"
-                        android:textColor="@color/colorTextViewLight"
+                        android:textColor="@color/colorWhite"
                         android:fontFamily="@font/montserrat"
                         android:text=""
                         android:textSize="12dp" />

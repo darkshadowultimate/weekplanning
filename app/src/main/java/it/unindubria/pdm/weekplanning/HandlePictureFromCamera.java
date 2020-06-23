@@ -36,6 +36,7 @@ public class HandlePictureFromCamera {
     Helper helper = new Helper();
 
     public HandlePictureFromCamera() {
+        // absolute path of the internal storage
         absolutePath = Environment.getExternalStorageDirectory().getAbsolutePath();
     }
 
@@ -55,11 +56,13 @@ public class HandlePictureFromCamera {
         );
     }
 
+    // get image file of the picture taken by the camera
     private File getImageFile(String uid, String date, String category) {
         String file = absolutePath + BASE_DIRECTORY_PATH + "/" + uid + "/" + date + "/" + category + "/" + uid + "_" + date + EXTENSION_IMAGES;
         return new File(file);
     }
 
+    // get directory based on the parameters passed
     private File getDirectory(String uid, String date, String category) {
         if(uid == null && date == null && category == null) {
             return new File(absolutePath + BASE_DIRECTORY_PATH);
@@ -79,27 +82,30 @@ public class HandlePictureFromCamera {
         Context context,
         Activity activity
     ) {
+        // check for permissions
         if(hasAppPermissions(context, Manifest.permission.CAMERA) && hasAppPermissions(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+            // create the directories structure if there isn't one
             helper.createDirectoryStructure(uid, date, category);
-
+            // get the file which the picture taken will be stored in
             File newfile = getImageFile(uid, date, category);
 
             try {
                 newfile.createNewFile();
 
+                // create a provider
                 Uri photoUri = FileProvider.getUriForFile(
                         context,
                         "com.example.android.fileprovider",
                         newfile
                 );
-
+                // create intent to take the picture by the camera
                 Intent takePhotoIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                 takePhotoIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoUri);
 
                 return takePhotoIntent;
             }
             catch (IOException e) {
-                helper.displayWithToast(context, "File not created");
+                helper.displayWithToast(context, context.getString(R.string.error_file_not_created));
             }
 
             return null;
@@ -140,6 +146,7 @@ public class HandlePictureFromCamera {
         }
     }
 
+    // transfer the content from the file containing the picture taken by the camera, to the ImageView
     public void setPreviewImage(
         String uid,
         String date,
@@ -148,6 +155,7 @@ public class HandlePictureFromCamera {
         Context context,
         Activity activity
     ) {
+        // check for permission to read external storage (having already write we used this)
         if(hasAppPermissions(context, Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
             File imgFile = getImageFile(uid, date, category);
 
@@ -194,15 +202,15 @@ public class HandlePictureFromCamera {
             if(withAuthorization) {
                 new AlertDialog
                     .Builder(context)
-                    .setTitle("Remove element")
-                    .setMessage("Do you really wanna remove this element?")
-                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    .setTitle(context.getString(R.string.warning_delete_image_title))
+                    .setMessage(context.getString(R.string.warning_delete_image_message))
+                    .setPositiveButton(context.getString(R.string.button_yes), new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
                             deleteImage(fileToDelete, uid, date, category, previewImage);
                         }
                     })
-                    .setNegativeButton("No", null)
+                    .setNegativeButton(context.getString(R.string.button_no), null)
                     .show();
             } else {
                 // delete the image without the authorization from the user

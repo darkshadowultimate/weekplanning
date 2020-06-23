@@ -188,6 +188,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         if(GoogleAPIHelper.isDeviceOnline(AddLunchDinner.this)) {
             switch(view.getId()) {
                 case R.id.add_item_meal:
+                    // there can be max 20 items
                     if(listFoodItemsLunchDinner.size() < 20) {
                         addFoodItem();
                     } else {
@@ -234,6 +235,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         }
     }
 
+    // get the text value of the subcategory selected from the dropdown at the top
     private String getSubcategoryStringValueForDB(String valueSelected) {
         for(int i = 0; i < SUBCATEGORIES_VOICES_DB.length; i++) {
             if(dropdown_subcategories.getItemAtPosition(i).toString().equals(valueSelected)) {
@@ -243,6 +245,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         return null;
     }
 
+    // set the time by the TimePicker
     private void setTimeSelected(final boolean isStartTime) {
         helper.setTimeWithTimePicker(
             AddLunchDinner.this,
@@ -257,10 +260,12 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         Intent cameraIntent = handlePictureFromCamera.takePicture(uid, dateSelected, lunchOrDinner, AddLunchDinner.this, AddLunchDinner.this);
 
         if(cameraIntent != null && cameraIntent.resolveActivity(getPackageManager()) != null) {
+            // open camera to take picture
             startActivityForResult(cameraIntent, helper.getTakePictureCodeStartActivity(AddLunchDinner.this));
         }
     }
 
+    // add new item to the listFoodItems ArrayList
     private void addFoodItem() {
         String nameFoodItem = editTextFood.getText().toString();
         String subcategory = getSubcategoryStringValueForDB(dropdown_subcategories.getSelectedItem().toString());
@@ -285,6 +290,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         editTextFood.setText("");
     }
 
+    // get the correct position where to insert the item passed as argument in the listFoodItemsLunchDinner
     private int getPositionToInsertItem(Food foodItem) {
         int priorityValArg = prioritySubCategories.get(foodItem.getSubcategory());
         int counter;
@@ -299,11 +305,13 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         return counter;
     }
 
+    // get the translation for the subcategory passed as parameter (this will be the summary of the Google Calendar event)
     private String getTranslationSubcategory(String keyword) {
         int idString = getResources().getIdentifier(keyword, "string", getPackageName());
         return getString(idString);
     }
 
+    // load data from database and update the listFoodItems ArrayList
     private void synchronizeListFoodItemsWithLocalDB() {
         ArrayList<Food> loadedFoodItems = localDB
                 .getAllFoodItemsSection(uid, dateSelected, lunchOrDinner);
@@ -311,6 +319,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         sortListFoodItems(loadedFoodItems);
     }
 
+    // sort the list food items based on their subcategory (starter, first course, second course, end of meal)
     private void sortListFoodItems(ArrayList<Food> listToOrder) {
         for (String valueCategory : SUBCATEGORIES_VOICES_DB) {
             for(Food item: listToOrder) {
@@ -325,6 +334,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         return;
     }
 
+    // handle the creation or the update of a new event in the user's Google Calendar
     private void insertUpdateMealGoogleCalendar() {
         final String allFoodItemsStringCalendarEvent = Helper.getStringListLunchDinnerItemsForDB(
                 SUBCATEGORIES_VOICES_DB, listFoodItemsLunchDinner, lunchOrDinner, AddLunchDinner.this
@@ -404,14 +414,17 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        // request permission for camera
         if (requestCode == helper.getCameraPermissionCode(AddLunchDinner.this)) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 helper.displayWithToast(AddLunchDinner.this, getString(R.string.success_can_take_picture));
             } else {
                 helper.displayWithToast(AddLunchDinner.this, getString(R.string.error_cannot_take_picture));
             }
+        // request permission for reading/writing on storage
         } else if (requestCode == helper.getStoragePermissionCode(AddLunchDinner.this)) {
             if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // load image's preview (if exists) from internal storage
                 handlePictureFromCamera.setPreviewImage(uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this, AddLunchDinner.this);
             } else {
                 helper.displayWithToast(AddLunchDinner.this, getString(R.string.error_cannot_save_picture));
@@ -422,12 +435,13 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
+        // finished activity for taking picture by the camera
         if (requestCode == helper.getTakePictureCodeStartActivity(AddLunchDinner.this) && resultCode == RESULT_OK) {
             handlePictureFromCamera.setPreviewImage(uid, dateSelected, lunchOrDinner, previewImage, AddLunchDinner.this, AddLunchDinner.this);
         }
     }
 
+    // handle mechanism to remove an element selected from the listView
     private void handleRemoveListViewItem() {
         listViewLunchDinner.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -449,6 +463,8 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         Helper.deleteAllFoodItemsFromDBWhichWereRemoved(localDB, listFoodItemsToDelete);
     }
 
+    // check all cases in order to not create inconsistency and update SQLite local db and Google Calendar
+    // (than terminate the activity)
     private void finishActivityAndGoBack() {
         Log.e("CONDITION START_TIME & END_TIME =======> ", String.valueOf(timeEvent.isTimeEventDefined()));
         // startTime and endTime must have a value
@@ -520,6 +536,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
         }
     }
 
+    // terminate the activity
     private void finishActivity() {
         setResult(Activity.RESULT_OK, new Intent());
         finish();
@@ -527,6 +544,7 @@ public class AddLunchDinner extends AppCompatActivity implements View.OnClickLis
 
     @Override
     public void onBackPressed() {
+        // if there were changes, than warn the user about this with a dialog
         Helper.handleBackButtonAddMeal(
             AddLunchDinner.this,
             AddLunchDinner.this,

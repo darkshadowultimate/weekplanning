@@ -39,8 +39,10 @@ public class LogIn extends AppCompatActivity implements View.OnClickListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_log_in);
 
+        // setting the google client object for sign in request
         mGoogleSignInClient = GoogleAPIHelper
                 .getGoogleSignInClient(getString(R.string.default_web_client_id), LogIn.this);
+        // getting Authentication Firebase instance
         mAuth = FirebaseAuth.getInstance();
 
         // for debug and development only
@@ -48,17 +50,21 @@ public class LogIn extends AppCompatActivity implements View.OnClickListener {
 
         loginButton = findViewById(R.id.login_button);
 
+        // checking if Google Play Services are installed
         if(GoogleAPIHelper.isGooglePlayServicesAvailable(LogIn.this)) {
+            // check if the user is already logged in (with Firebase)
             if(mAuth.getCurrentUser() != null) {
                 startActivity(helper.changeActivity(this, MainActivity.class));
             }
             loginButton.setOnClickListener(this);
         } else {
+            // warn the user that Google Play Services are not installed
             helper.displayWithDialog(
                 LogIn.this,
                 getString(R.string.error_google_play_services_unavailable_title),
                 getString(R.string.error_google_play_services_unavailable_message)
             );
+            // close the app after 5 seconds (it won't work without Google Play Services)
             new android.os.Handler().postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -70,9 +76,9 @@ public class LogIn extends AppCompatActivity implements View.OnClickListener {
 
     @Override
     public void onClick(View view) {
+        // check if the device is connected online
         if(GoogleAPIHelper.isDeviceOnline(LogIn.this)) {
             if(view.getId() == R.id.login_button) {
-                // login
                 login();
             }
         }
@@ -87,9 +93,10 @@ public class LogIn extends AppCompatActivity implements View.OnClickListener {
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             try {
                 // Google Sign In was successful, authenticate with Firebase
+                // Getting info account
                 GoogleSignInAccount account = task.getResult(ApiException.class);
                 Log.d("ON ACTIVITY RESULT", "firebaseAuthWithGoogle:" + account.getEmail());
-
+                // Authenticate with Firebase
                 firebaseAuthWithGoogle(account.getIdToken());
             } catch (ApiException e) {
                 // Google Sign In failed, update UI appropriately
@@ -99,6 +106,7 @@ public class LogIn extends AppCompatActivity implements View.OnClickListener {
     }
 
     private void login() {
+        // Create an Intent to Sign in with Google
         Intent signInIntent = mGoogleSignInClient.getSignInIntent();
         startActivityForResult(signInIntent, SIGN_IN_ACTIVITY_CODE);
     }
@@ -111,15 +119,14 @@ public class LogIn extends AppCompatActivity implements View.OnClickListener {
             .addOnCompleteListener(LogIn.this, new OnCompleteListener<AuthResult>() {
                 @Override
                 public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful()) {
-                        // Sign in success, update UI with the signed-in user's information
-                        Log.d("GOOGLE SIGNIN", "signInWithCredential:success");
-                        startActivity(helper.changeActivity(LogIn.this, MainActivity.class));
-                    } else {
-                        // If sign in fails, display a message to the user.
-                        Log.w("GOOGLE SIGNIN", "signInWithCredential:failure", task.getException());
-                        //Snackbar.make(mBinding.mainLayout, "Authentication Failed.", Snackbar.LENGTH_SHORT).show();
-                    }
+                if (task.isSuccessful()) {
+                    // Sign in success, start activity MainActivity.java
+                    Log.d("GOOGLE SIGNIN", "signInWithCredential:success");
+                    startActivity(helper.changeActivity(LogIn.this, MainActivity.class));
+                } else {
+                    // Sign in failed, log the error.
+                    Log.w("GOOGLE SIGNIN", "signInWithCredential:failure", task.getException());
+                }
                 }
             });
     }

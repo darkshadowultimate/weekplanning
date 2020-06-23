@@ -26,12 +26,13 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.io.IOException;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
 
     // CONSTANTS
+    // Keywords subcategories for lunch and dinner
+    // before = starter, first => first course, second => second course, after => end of meal
     private final String[] SUBCATEGORIES_VOICES_DB = { "before", "first", "second", "after" };
 
     // Firebase
@@ -74,28 +75,33 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        // setting the default value of the current date
         setDefaultValueDateSelected();
 
         // setting up Firebase
         mFirebaseAuth = FirebaseAuth.getInstance();
         mFirebaseUser = mFirebaseAuth.getCurrentUser();
 
+        // check if the user is logged in
         if(mFirebaseUser == null) {
+            // if not, start the activity LogIn.java
             startActivity(helper.changeActivity(MainActivity.this, LogIn.class));
         } else {
             uid = mFirebaseUser.getUid();
+            // create the directory WeekPlanning, if it doesn't exist, inside the internal storage of the device
+            // here will be stored all the pictures taken by the camera
             helper.createNewDirectory("/WeekPlanning/" + uid);
         }
-
+        // setting toolbar
         Toolbar toolbar = (Toolbar) findViewById(R.id.custom_toolbar);
         setSupportActionBar(toolbar);
-
+        // setting Google Calendar Builder to authorize all the requests to Google Calendar with OAuth2
         service = GoogleCalendarHelper.getCalendarBuilderInstance(
                 MainActivity.this,
                 mFirebaseUser.getEmail()
         );
 
-        // open connection to local SQLite database
+        // open connection to local SQLite database (read mode)
         localDB = DBAdapter.getInstance(MainActivity.this);
         localDB.openRead();
 
@@ -104,6 +110,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         buttonAddLunch = findViewById(R.id.mainactivity_add_lunch_button);
         buttonAddDinner = findViewById(R.id.mainactivity_add_dinner_button);
 
+        // the cards will contain the info inserted by the user (one card for meal)
         breakfastCard = findViewById(R.id.single_card_breakfast);
         titleBreakfastCard = findViewById(R.id.title_breakfast_card);
         foodItemBreakfast = findViewById(R.id.food_items_part_breakfast);
@@ -125,17 +132,23 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private void createNewGoogleCalendar() {
         try {
+            // create a new calendar inside the Google Calendar of the user
             String calendarId = GoogleCalendarHelper.createNewCalendar(
                     service,
                     uid,
                     getString(R.string.google_calendar_description)
             );
+            // if the calendar was successfully created,
+            // insert it (alongside with uid) in the local SQLite db
             if (calendarId != null) {
                 localDB.insertNewUserCalendar(uid, calendarId);
+                // this variable will be used to make operations on the Google Calendar created
                 weekPlanningCalendarId = calendarId;
             }
             Log.d("CREATE_NEW_CALENDAR", String.valueOf(calendarId));
         } catch(UserRecoverableAuthIOException exc) {
+            // if the user hasn't given the permission to this app to access the user's Google Calendar,
+            // then ask the permissions to the user
             startActivityForResult(
                 exc.getIntent(),
                 helper.getGoogleCalendarCodeStartActivity(MainActivity.this)
@@ -146,23 +159,20 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void handleCreateNewGoogleCalendar() {
+        // load the id of the calendar created on Google Calendar for this user
         final String calendarId = localDB.getCalendarId(uid);
         new Thread(new Runnable() {
             @Override
             public void run() {
-                try {
-                    Log.e("CHECK IF CALENDAR ID EXISTS FROM LOCAL DB =======> ", calendarId == null ? "NULL" : calendarId);
-                    // check if the calendar exists
-                    if(calendarId == null) {
-                        createNewGoogleCalendar();
-                    } else {
-                        com.google.api.services.calendar.model.Calendar cal = service.calendars().get(calendarId).execute();
-                        weekPlanningCalendarId = calendarId;
-                        Log.e("GET EXISTING CALENDAR =======> ", weekPlanningCalendarId);
-                    }
-                } catch(IOException exc) {
-                    Log.e("EXCEPTION RETRIEVE CALENDAR", "CALENDAR NOT FOUND");
+                Log.e("CHECK IF CALENDAR ID EXISTS FROM LOCAL DB =======> ", calendarId == null ? "NULL" : calendarId);
+                // if the calendar's id is null,
+                // then no calendar has been created yet, so create a new calendar
+                if(calendarId == null) {
                     createNewGoogleCalendar();
+                } else {
+                    // store the calendar's id for future actions inside the app
+                    weekPlanningCalendarId = calendarId;
+                    Log.e("GET EXISTING CALENDAR =======> ", weekPlanningCalendarId);
                 }
             }
         }).start();
@@ -171,11 +181,13 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     @Override
     protected void onStart() {
         super.onStart();
-
+        // handle all mechanism to control if a calendar already exists on user's Google Calendar
+        // and if not, create a new one
         handleCreateNewGoogleCalendar();
     }
 
     private void updateUI() {
+        // all the food items from the local SQLite db (of this user and of the date selected on the local calendar of the app)
         ArrayList<Food> foodDateList = localDB.getAllFoodItemsDate(uid, selectedDateString);
 
         updateBreakfast(foodDateList);
@@ -184,6 +196,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void updateBreakfast(ArrayList<Food> foodItems) {
+        // update the UI breakfast card
         String allItemsString = helper.getStringListBreakfastItem(foodItems);
 
         foodItemBreakfast.setText(allItemsString);
@@ -198,6 +211,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void updateLunch(ArrayList<Food> foodItems, String lunchOrDinner) {
+        // update the UI lunch or dinner card
         boolean isThereLunch = false;
 
         for(String subcategory: SUBCATEGORIES_VOICES_DB) {
@@ -244,6 +258,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void startActivityForResultMeal(String typeOfMeal) {
+        // handle the start of a new activity to add a meal, based on typeOfMeal's value
         if(typeOfMeal.equals(getString(R.string.constant_breakfast))) {
             Log.e("READY TO START BREAKFAST ACTIVITY ======> ", typeOfMeal);
             Intent breakfastIntent = new Intent(MainActivity.this, AddBreakfast.class);
@@ -276,6 +291,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public void onClick(View view) {
+        // check if the device is online
         if(GoogleAPIHelper.isDeviceOnline(MainActivity.this)) {
             switch(view.getId()) {
                 case R.id.single_card_breakfast:
@@ -295,6 +311,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setDefaultValueDateSelected() {
+        // set the default value of selectedDateString variables when the app is loaded (current day)
         java.util.Calendar calendar = java.util.Calendar.getInstance();
 
         int dayOfMonth = calendar.get(java.util.Calendar.DAY_OF_MONTH);
@@ -305,6 +322,8 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void setListernerCalendarView() {
+        // everytime the user selects a day on the local calendar inside the app,
+        // update selectedDateString variable value and the UI
         calendar.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
             @Override
             public void onSelectedDayChange(CalendarView view, int year, int month, int dayOfMonth) {
@@ -315,6 +334,9 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void requireGoogleCalendarPermissions() {
+        // If the user hasn't given the permission to access his Google Calendar, asks again.
+        // If the user will decline, than close the app (Google Calendar it's a necessary requirement),
+        // otherwise, call the handleCreateNewGoogleCalendar method
         new AlertDialog
             .Builder(MainActivity.this)
             .setTitle(getString(R.string.warning_permission_calendar_title))
@@ -340,6 +362,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
+        // handle sign out from Firebase and Google Client
         switch(item.getItemId()) {
             case R.id.logout:
                 new AlertDialog
@@ -365,24 +388,30 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        // check if the AddBreakfast or AddLunchDinner activity have finished
         if (
             requestCode == helper.getBreakfastCodeStartActivity(MainActivity.this) ||
             requestCode == helper.getLunchDinnerCodeStartActivity(MainActivity.this)
         ) {
             if(resultCode == Activity.RESULT_OK) {
+                // if everything went good, than update the UI to display updated data
                 updateUI();
             }
             if (resultCode == Activity.RESULT_CANCELED) {}
         } else if(requestCode == helper.getGoogleCalendarCodeStartActivity(MainActivity.this)) {
             if(resultCode == RESULT_OK) {
+                // if the user gave the permission to connect to his Google Calendar,
+                // than handle the mechanisms to create a new calendar
                 handleCreateNewGoogleCalendar();
             } else {
+                // insist on require permissions for Google Calendar if the user didn't give them
                 requireGoogleCalendarPermissions();
             }
         }
     }
 
     private void logout() {
+        // logout from Firebase
         FirebaseAuth.getInstance().signOut();
 
         GoogleSignInClient googleClient = GoogleAPIHelper.getGoogleSignInClient(getString(R.string.default_web_client_id), MainActivity.this);
@@ -394,6 +423,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
+                        // start activity LogIn.java
                         startActivity(helper.changeActivity(MainActivity.this, LogIn.class));
                     }
                 }

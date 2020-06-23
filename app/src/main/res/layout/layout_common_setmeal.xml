@@ -31,11 +31,11 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:background="@drawable/custom_button"
-            android:backgroundTint="@color/colorAddButton"
+            android:backgroundTint="@color/colorAccent"
             android:fontFamily="@font/quicksand_bold"
             android:text="@string/button_add_item_meal"
             android:textAllCaps="false"
-            android:textColor="@color/textColorCustomButton"
+            android:textColor="@color/colorWhite"
             android:textSize="18sp" />
     </LinearLayout>
 
@@ -118,7 +118,7 @@
             android:fontFamily="@font/quicksand_bold"
             android:text="@string/button_delete_meal"
             android:textAllCaps="false"
-            android:textColor="@color/textColorCustomButton"
+            android:textColor="@color/colorWhite"
             android:textSize="20sp" />
 
         <Button
@@ -131,7 +131,7 @@
             android:fontFamily="@font/quicksand_bold"
             android:text="@string/button_done"
             android:textAllCaps="false"
-            android:textColor="@color/textColorCustomButton"
+            android:textColor="@color/colorWhite"
             android:textSize="20sp" />
     </LinearLayout>
 </LinearLayout>

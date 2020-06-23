@@ -55,6 +55,7 @@
     <string name="error_time_event_end_near_message">
         You need at least 20 minutes to eat your meal!
     </string>
+    <string name="error_file_not_created">File not created</string>
     <string name="ok" translatable="false">OK</string>
 
     <!-- Success messages -->
@@ -89,6 +90,10 @@
     <string name="warning_on_back_button_changes_message">
         Some changes were made.
         \nDo you really wanna go back?
+    </string>
+    <string name="warning_delete_image_title">Delete image</string>
+    <string name="warning_delete_image_message">
+        Do you really wanna delete this image?
     </string>
 
     <!-- Buttons -->
